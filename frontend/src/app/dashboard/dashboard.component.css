@@ -1,0 +1,165 @@
+/* Dashboard-specific styles (cards, info rows, roles, code blocks).
+   Shared shell/header styles live in AppComponent. */
+
+.welcome-section {
+  margin-bottom: 35px;
+}
+
+.welcome-card {
+  background: linear-gradient(135deg, #0F2C59 0%, #1E3A8A 100%);
+  color: #FFFFFF;
+  padding: 30px;
+  border-radius: 16px;
+  border-left: 6px solid #D4AF37;
+  box-shadow: 0 10px 20px -5px rgba(15, 44, 89, 0.15);
+}
+
+.welcome-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.welcome-subtitle {
+  color: #E2E8F0;
+  font-size: 0.95rem;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 30px;
+}
+
+.card {
+  background: #FFFFFF;
+  border-radius: 16px;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1.5px solid #F1F5F9;
+  padding-bottom: 15px;
+}
+
+.card-icon {
+  color: #D4AF37;
+}
+
+.card-header h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0F2C59;
+}
+
+.card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px dashed #E2E8F0;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  font-size: 0.85rem;
+  color: #64748B;
+  font-weight: 600;
+}
+
+.info-value {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #1E293B;
+}
+
+.code-font {
+  font-family: monospace;
+  background-color: #F8FAFC;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  color: #0F2C59;
+}
+
+.section-desc {
+  font-size: 0.85rem;
+  color: #64748B;
+  line-height: 1.5;
+}
+
+.roles-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.role-badge {
+  background-color: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  color: #1E40AF;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+}
+
+.no-roles {
+  color: #64748B;
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+.roles-tip {
+  background-color: #FFFBEB;
+  border: 1px solid #FDE68A;
+  color: #92400E;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.code-block {
+  background-color: #0F172A;
+  color: #F8FAFC;
+  padding: 14px;
+  border-radius: 8px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.8rem;
+  overflow-x: auto;
+  border-left: 3px solid #D4AF37;
+}
+
+@media (max-width: 768px) {
+  .welcome-card {
+    padding: 20px;
+  }
+
+  .welcome-title {
+    font-size: 1.4rem;
+  }
+
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+}

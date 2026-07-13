@@ -1,0 +1,16 @@
+# Root compose: Angular frontend served by nginx.
+# Run with: docker compose up -d --build
+# Runtime values are loaded from .env (see .env.example).
+
+services:
+  angular-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: angular_frontend_app
+    ports:
+      # Host port is configurable; container always listens on 80 (nginx)
+      - "${FRONTEND_PORT:?Set FRONTEND_PORT in .env}:80"
+    restart: always
+    environment:
+      - NODE_ENV=production

@@ -1,0 +1,32 @@
+# ---- Node / Angular ----
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# Angular CLI artifacts
+dist/
+.angular/
+out-tsc/
+tmp/
+*.tgz
+
+# Build artifacts
+*.log
+
+# IDEs / editors
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Environment overrides (keep the committed templates)
+.env
+.env.local
+.env.*.local
+
+# Docker volumes (postgres data etc.)
+**/postgres_data/
+
+# Misc
+.cache/

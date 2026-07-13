@@ -1,0 +1,59 @@
+<section class="welcome-section">
+  <div class="welcome-card">
+    <h1 class="welcome-title" *ngIf="isAuthenticated; else guestTitle">Bienvenue dans votre espace sécurisé, {{ fullName }} !</h1>
+    <ng-template #guestTitle>
+      <h1 class="welcome-title">Bienvenue dans Gestion du Parc Automobile</h1>
+    </ng-template>
+    <p class="welcome-subtitle" *ngIf="isAuthenticated; else guestSubtitle">Votre session a été authentifiée avec succès via le serveur Keycloak.</p>
+    <ng-template #guestSubtitle>
+      <p class="welcome-subtitle">Connectez-vous avec le bouton Connexion pour accéder à votre profil, vos rôles et les fonctions sécurisées.</p>
+    </ng-template>
+  </div>
+</section>
+
+<div class="content-grid">
+  <!-- Profile details -->
+  <div class="card">
+    <div class="card-header">
+      <svg viewBox="0 0 24 24" class="card-icon" width="24" height="24"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 4c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm0 14c-2.03 0-4.43-.82-6.14-2.88a9.947 9.947 0 0 1 12.28 0C16.43 19.18 14.03 20 12 20z"/></svg>
+      <h2>Détails du Profil</h2>
+    </div>
+    <div class="card-body">
+      <div class="info-row">
+        <span class="info-label">Nom d'utilisateur</span>
+        <span class="info-value">{{ username }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Adresse Email</span>
+        <span class="info-value">{{ email }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Nom Complet</span>
+        <span class="info-value">{{ fullName }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">ID Keycloak (sub)</span>
+        <span class="info-value code-font">{{ subject }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Roles & permissions -->
+  <div class="card">
+    <div class="card-header">
+      <svg viewBox="0 0 24 24" class="card-icon" width="24" height="24"><path fill="currentColor" d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4Zm-2 15l-4-4 1.41-1.41L10 13.17l7.59-7.59L19 7l-9 9Z"/></svg>
+      <h2>Rôles &amp; Habilitations</h2>
+    </div>
+    <div class="card-body">
+      <p class="section-desc">Ces rôles proviennent du jeton d'accès et sont utilisés par Spring Boot pour sécuriser vos APIs :</p>
+      <div class="roles-container">
+        <span class="role-badge" *ngFor="let role of roles">{{ role }}</span>
+        <div class="no-roles" *ngIf="roles.length === 0">Aucun rôle assigné.</div>
+      </div>
+      <div class="roles-tip">
+        <strong>Astuce :</strong> Vous pouvez attribuer les rôles comme <code>admin</code> ou <code>gestionnaire</code> directement dans le panneau d'administration Keycloak sous l'onglet <em>Role Mapping</em> du profil utilisateur.
+      </div>
+    </div>
+  </div>
+
+</div>
