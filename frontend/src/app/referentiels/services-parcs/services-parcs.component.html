@@ -1,0 +1,94 @@
+<app-page-header
+  eyebrow="Référentiels"
+  title="Services et parcs"
+  description="Gérez les directions et les parcs communs utilisés pour l’affectation des véhicules.">
+  <button class="btn btn-primary" type="button" (click)="ouvrirCreation()">
+    <svg viewBox="0 0 24 24" width="17" height="17"><path fill="currentColor" d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5Z"/></svg>
+    Ajouter un service ou parc
+  </button>
+</app-page-header>
+
+<section class="summary-grid">
+  <app-summary-card [value]="statistiques.total" label="Services et parcs" [icon]="buildingIcon"></app-summary-card>
+  <app-summary-card [value]="statistiques.actifs" label="Actifs" [icon]="activeIcon"></app-summary-card>
+  <app-summary-card [value]="statistiques.directions" label="Directions" [icon]="directionIcon" tone="gold"></app-summary-card>
+  <app-summary-card [value]="statistiques.parcsCommuns" label="Parcs communs" [icon]="parcIcon" tone="gold"></app-summary-card>
+</section>
+
+<section class="panel list-panel">
+  <app-search-toolbar [control]="recherche" placeholder="Rechercher par code ou libellé…" ariaLabel="Rechercher un service ou parc" (refreshed)="charger()">
+    <select class="filter-select" [formControl]="typeFiltre" aria-label="Filtrer par type">
+      <option value="">Tous les types</option>
+      <option value="DIRECTION">Direction</option>
+      <option value="PARC_COMMUN">Parc commun</option>
+    </select>
+    <select class="filter-select" [formControl]="statutFiltre" aria-label="Filtrer par statut">
+      <option value="">Tous les statuts</option>
+      <option value="actif">Actif</option>
+      <option value="inactif">Inactif</option>
+    </select>
+  </app-search-toolbar>
+
+  <app-data-table *ngIf="!chargement && page.contenu.length">
+    <table class="data-table">
+      <thead><tr><th>Code</th><th>Libellé</th><th>Type</th><th>Statut</th><th>Création</th><th class="actions-column">Actions</th></tr></thead>
+      <tbody>
+        <tr *ngFor="let serviceParc of page.contenu; trackBy: identifier">
+          <td><span class="code-chip">{{ serviceParc.code }}</span></td>
+          <td><button class="entity-link" type="button" (click)="consulter(serviceParc)">{{ serviceParc.libelle }}</button></td>
+          <td><span class="type-label">{{ libelleType(serviceParc.type) }}</span></td>
+          <td><span class="status-badge" [class.success]="serviceParc.actif" [class.neutral]="!serviceParc.actif">{{ serviceParc.actif ? 'Actif' : 'Inactif' }}</span></td>
+          <td><div class="audit-cell"><span>{{ serviceParc.dateCreation | date:'dd/MM/yyyy' }}</span><small>par {{ serviceParc.creePar }}</small></div></td>
+          <td class="actions-cell">
+            <app-table-action kind="view" (triggered)="consulter(serviceParc)"></app-table-action>
+            <app-table-action kind="edit" (triggered)="ouvrirModification(serviceParc)"></app-table-action>
+            <app-table-action kind="status" [label]="serviceParc.actif ? 'Désactiver' : 'Activer'" (triggered)="demanderChangementStatut(serviceParc)"></app-table-action>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </app-data-table>
+
+  <app-table-loading *ngIf="chargement"></app-table-loading>
+  <app-empty-state *ngIf="!chargement && !page.contenu.length && !erreur" title="Aucun service ou parc trouvé" [description]="recherche.value || typeFiltre.value || statutFiltre.value ? 'Aucun résultat ne correspond aux filtres sélectionnés.' : 'Commencez par créer le premier service ou parc.'">
+    <button class="btn btn-primary" type="button" *ngIf="!recherche.value && !typeFiltre.value && !statutFiltre.value" (click)="ouvrirCreation()">Ajouter un service ou parc</button>
+  </app-empty-state>
+  <app-empty-state *ngIf="!chargement && erreur" title="Chargement impossible" [description]="erreur"><button class="btn btn-secondary" type="button" (click)="charger()">Réessayer</button></app-empty-state>
+  <app-pagination *ngIf="!chargement" [page]="page.page" [pageSize]="page.taille" [totalItems]="page.totalElements" [totalPages]="page.totalPages" [first]="page.premiere" [last]="page.derniere" (pageChange)="charger($event)"></app-pagination>
+</section>
+
+<app-detail-drawer [open]="chargementDetail || !!selection" [loading]="chargementDetail" loadingText="Chargement du service…" eyebrow="Fiche service / parc" [title]="selection?.libelle || ''" [code]="selection?.code || ''" ariaLabel="Détail du service ou parc" (closed)="selection = null">
+  <ng-container *ngIf="selection as serviceParc">
+    <div class="detail-actions">
+      <button class="btn btn-secondary btn-compact" type="button" (click)="ouvrirModification(serviceParc)">Modifier</button>
+      <button class="btn btn-compact" [class.btn-danger]="serviceParc.actif" [class.btn-secondary]="!serviceParc.actif" type="button" (click)="demanderChangementStatut(serviceParc)">{{ serviceParc.actif ? 'Désactiver' : 'Activer' }}</button>
+    </div>
+    <dl class="identity-grid">
+      <div><dt>Type</dt><dd>{{ libelleType(serviceParc.type) }}</dd></div>
+      <div><dt>Statut</dt><dd><span class="status-badge" [class.success]="serviceParc.actif" [class.neutral]="!serviceParc.actif">{{ serviceParc.actif ? 'Actif' : 'Inactif' }}</span></dd></div>
+    </dl>
+    <section class="detail-section">
+      <div class="section-title"><div><span>Véhicules actuellement rattachés</span><strong>{{ serviceParc.vehicules.length }}</strong></div></div>
+      <div class="vehicle-list" *ngIf="serviceParc.vehicules.length; else aucunVehicule">
+        <article *ngFor="let vehicule of serviceParc.vehicules"><strong>{{ vehicule.immatriculation }}</strong><span>{{ vehicule.marqueModele }}</span></article>
+      </div>
+      <ng-template #aucunVehicule><div class="no-vehicles">Aucun véhicule actuellement rattaché.</div></ng-template>
+    </section>
+    <app-audit-trail [createdAt]="serviceParc.dateCreation" [createdBy]="serviceParc.creePar" [updatedAt]="serviceParc.dateModification" [updatedBy]="serviceParc.modifiePar || ''"></app-audit-trail>
+    <app-activity-timeline [items]="historique"></app-activity-timeline>
+  </ng-container>
+</app-detail-drawer>
+
+<app-form-modal [open]="dialogueOuvert" [eyebrow]="dialogueMode === 'create' ? 'Nouvelle entrée' : 'Modification'" [title]="dialogueMode === 'create' ? 'Ajouter un service ou parc' : 'Modifier le service ou parc'" (closed)="dialogueOuvert = false">
+  <form [formGroup]="formulaire" (ngSubmit)="enregistrer()">
+    <div class="form-grid">
+      <app-form-field label="Code" controlId="codeService" [required]="true" help="Code unique, par exemple DSI ou PMU." [error]="formulaire.controls.code.touched && formulaire.controls.code.invalid ? 'Le code est obligatoire (20 caractères maximum).' : ''"><input class="form-control" id="codeService" [formControl]="formulaire.controls.code" maxlength="20" placeholder="Ex. DSI"></app-form-field>
+      <app-form-field label="Type" controlId="typeService" [required]="true"><select class="form-control" id="typeService" [formControl]="formulaire.controls.type"><option value="DIRECTION">Direction</option><option value="PARC_COMMUN">Parc commun</option></select></app-form-field>
+      <app-form-field class="full-field" label="Libellé" controlId="libelleService" [required]="true" [error]="formulaire.controls.libelle.touched && formulaire.controls.libelle.invalid ? 'Le libellé est obligatoire (100 caractères maximum).' : ''"><input class="form-control" id="libelleService" [formControl]="formulaire.controls.libelle" maxlength="100" placeholder="Ex. Direction des systèmes d’information"></app-form-field>
+    </div>
+    <p class="default-status" *ngIf="dialogueMode === 'create'"><span></span>Le nouveau service sera créé avec le statut Actif.</p>
+    <footer><button class="btn btn-secondary" type="button" (click)="dialogueOuvert = false">Annuler</button><button class="btn btn-primary" type="submit" [disabled]="enregistrement"><span class="button-spinner" *ngIf="enregistrement"></span>{{ dialogueMode === 'create' ? 'Créer le service' : 'Enregistrer' }}</button></footer>
+  </form>
+</app-form-modal>
+
+<app-confirm-dialog [open]="!!cibleStatut" [destructive]="!!cibleStatut?.actif" [title]="cibleStatut?.actif ? 'Désactiver le service' : 'Activer le service'" [message]="cibleStatut?.actif ? 'Le service restera visible dans les historiques mais ne sera plus proposé pour les nouvelles affectations.' : 'Le service sera de nouveau disponible pour les nouvelles affectations.'" [confirmLabel]="cibleStatut?.actif ? 'Désactiver' : 'Activer'" (cancelled)="cibleStatut = null" (confirmed)="confirmerChangementStatut()"></app-confirm-dialog>

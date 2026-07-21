@@ -1,0 +1,6 @@
+<div class="reusable-form-field">
+  <label [attr.for]="controlId">{{ label }} <span *ngIf="required" class="required">*</span></label>
+  <ng-content></ng-content>
+  <small class="field-help" *ngIf="help">{{ help }}</small>
+  <small class="field-error" *ngIf="error">{{ error }}</small>
+</div>

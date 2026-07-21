@@ -1,0 +1,5 @@
+<div class="table-loading" aria-label="Chargement">
+  <div class="table-loading-row" *ngFor="let row of rowItems" [style.grid-template-columns]="columns">
+    <span class="skeleton" *ngFor="let cell of cellItems" [class.wide]="cell === 1" [class.medium]="cell === 3"></span>
+  </div>
+</div>

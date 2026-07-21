@@ -1,0 +1,7 @@
+.table-loading { padding: 4px 20px; }
+.table-loading-row { display: grid; height: 62px; align-items: center; gap: 35px; border-bottom: 1px solid var(--color-border); }
+.table-loading-row span { width: 70px; height: 15px; }
+.table-loading-row .wide { width: 180px; }
+.table-loading-row .medium { width: 120px; }
+@media (max-width: 760px) { .table-loading-row { grid-template-columns: 70px 1fr !important; }.table-loading-row span:nth-child(n+3) { display: none; } }
+:host { display: block; }

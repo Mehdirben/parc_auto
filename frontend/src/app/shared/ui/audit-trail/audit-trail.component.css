@@ -1,0 +1,8 @@
+.audit-trail { margin-bottom: 25px; padding-top: 20px; border-top: 1px solid var(--color-border); }
+.audit-trail h3 { margin-bottom: 12px; color: var(--color-ink); font-size: .77rem; font-weight: 800; }
+.audit-trail dl { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.audit-trail dl div { display: flex; padding: 11px; flex-direction: column; background: var(--color-surface-muted); border-radius: 8px; }
+.audit-trail dt { color: var(--color-muted); font-size: .59rem; }
+.audit-trail dd { margin-top: 4px; color: var(--color-text); font-size: .67rem; font-weight: 650; }
+@media (max-width: 760px) { .audit-trail dl { grid-template-columns: 1fr; } }
+:host { display: block; }

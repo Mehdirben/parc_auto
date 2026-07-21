@@ -1,16 +1,72 @@
-# Root compose: Angular frontend served by nginx.
-# Run with: docker compose up -d --build
-# Runtime values are loaded from .env (see .env.example).
+# Full application stack: SQL Server, Spring Boot API and Angular/nginx.
+# Keycloak remains in keycloak/docker-compose.yml and is reached through
+# host.docker.internal from the backend container.
 
 services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: parc_automobile_sqlserver
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: Developer
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:?Set MSSQL_SA_PASSWORD in .env}
+    ports:
+      - "${SQLSERVER_PORT:-1433}:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$${MSSQL_SA_PASSWORD}\" -C -Q \"SELECT 1\" || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    restart: unless-stopped
+
+  sqlserver-init:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: parc_automobile_sqlserver_init
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    environment:
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:?Set MSSQL_SA_PASSWORD in .env}
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - >
+        /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P "$${MSSQL_SA_PASSWORD}" -C
+        -Q "IF DB_ID(N'parc_automobile') IS NULL CREATE DATABASE parc_automobile"
+    restart: "no"
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: parc_automobile_backend
+    environment:
+      DB_URL: "jdbc:sqlserver://sqlserver:1433;databaseName=parc_automobile;encrypt=true;trustServerCertificate=true"
+      DB_USERNAME: sa
+      DB_PASSWORD: ${MSSQL_SA_PASSWORD:?Set MSSQL_SA_PASSWORD in .env}
+      KEYCLOAK_JWK_SET_URI: "http://host.docker.internal:${KEYCLOAK_PORT:-8085}/realms/parc-automobile/protocol/openid-connect/certs"
+      CORS_ALLOWED_ORIGINS: "http://localhost:${FRONTEND_PORT:-4205},http://localhost:4200"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    depends_on:
+      sqlserver-init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
   angular-frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: angular_frontend_app
     ports:
-      # Host port is configurable; container always listens on 80 (nginx)
       - "${FRONTEND_PORT:?Set FRONTEND_PORT in .env}:80"
-    restart: always
-    environment:
-      - NODE_ENV=production
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  sqlserver_data:

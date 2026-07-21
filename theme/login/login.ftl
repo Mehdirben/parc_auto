@@ -1,4 +1,4 @@
-<#-- Custom Login Page for Gestion du Parc Automobile (MESRSI) -->
+<#-- MESRSI Parc Automobile - Keycloak login page -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -7,99 +7,132 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
     <title>Connexion - Gestion du Parc Automobile</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${url.resourcesPath}/css/styles.css" type="text/css" />
 </head>
 <body>
-    <div class="login-wrapper">
-        <div class="login-background">
-            <div class="circle circle-1"></div>
-            <div class="circle circle-2"></div>
-        </div>
-        
-        <div class="login-card-container">
-            <!-- Ministry / Brand Header -->
-            <div class="login-header">
-                <div class="logo-area">
-                    <!-- SVG Royal Moroccan Crest inspired graphic -->
-                    <svg viewBox="0 0 100 100" class="ministry-logo" width="70" height="70">
-                        <polygon points="50,10 90,30 90,70 50,90 10,70 10,30" fill="none" stroke="#D4AF37" stroke-width="3" />
-                        <polygon points="50,18 82,34 82,66 50,82 18,66 18,34" fill="none" stroke="#1A365D" stroke-width="2" />
-                        <path d="M50,25 L65,65 L30,40 L70,40 L35,65 Z" fill="#D4AF37" /> <!-- Green/Gold Star -->
-                    </svg>
+    <main class="login-page">
+        <div class="background-grid" aria-hidden="true"></div>
+        <div class="background-orb orb-one" aria-hidden="true"></div>
+        <div class="background-orb orb-two" aria-hidden="true"></div>
+
+        <section class="login-shell">
+            <aside class="brand-panel">
+                <div class="brand-topline"></div>
+                <div class="brand-identity">
+                    <div class="brand-emblem">
+                        <svg viewBox="0 0 100 100" width="62" height="62" aria-hidden="true">
+                            <polygon points="50,8 91,29 91,71 50,92 9,71 9,29" fill="none" stroke="currentColor" stroke-width="3" />
+                            <polygon points="50,17 82,34 82,66 50,83 18,66 18,34" fill="none" stroke="#ffffff" stroke-opacity=".72" stroke-width="2" />
+                            <path d="M50 24 57 42l19 1-15 12 5 19-16-11-16 11 5-19-15-12 19-1 7-18Z" fill="currentColor" />
+                        </svg>
+                    </div>
+                    <div>
+                        <span class="brand-name">PARC MESRSI</span>
+                        <span class="brand-caption">Gestion automobile</span>
+                    </div>
                 </div>
-                <div class="ministry-title">ROYAUME DU MAROC</div>
-                <div class="ministry-subtitle">Ministère de l'Enseignement Supérieur, de la Recherche Scientifique et de l'Innovation</div>
-                <h1 class="app-title">Gestion du Parc Automobile</h1>
-                <p class="app-subtitle">Connectez-vous pour accéder à l'application</p>
-            </div>
 
-            <!-- Keycloak Error/Info Messages -->
-            <#if message?? && (message.type != 'warning' || !isAppInitiatedAction??)>
-                <div class="alert alert-${message.type}">
-                    <div class="alert-icon">
-                        <#if message.type = 'success'>
-                            <svg viewBox="0 0 24 24" class="svg-icon"><path fill="currentColor" d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2m-2 15-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9Z"/></svg>
-                        <#elseif message.type = 'error'>
-                            <svg viewBox="0 0 24 24" class="svg-icon"><path fill="currentColor" d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2m1 15h-2v-2h2v2m0-4h-2V7h2v6Z"/></svg>
-                        <#else>
-                            <svg viewBox="0 0 24 24" class="svg-icon"><path fill="currentColor" d="M11 18h2v-2h-2v2m1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2V7z"/></svg>
-                        </#if>
-                    </div>
-                    <span class="alert-text">${kcSanitize(message.summary)?no_esc}</span>
+                <div class="brand-message">
+                    <span class="brand-kicker">ROYAUME DU MAROC</span>
+                    <h1>Le parc automobile,<br>piloté simplement.</h1>
+                    <p>Un espace centralisé et sécurisé pour gérer les référentiels, les véhicules, les affectations et les documents du parc.</p>
                 </div>
-            </#if>
 
-            <!-- Login Form -->
-            <#if realm.password>
-                <form id="kc-form-login" class="login-form" onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="post">
-                    
-                    <!-- Username / Email Field -->
-                    <div class="form-group">
-                        <label for="username" class="form-label">Identifiant ou Adresse Email</label>
-                        <div class="input-wrapper">
-                            <span class="input-icon">
-                                <svg viewBox="0 0 24 24" class="svg-icon"><path fill="currentColor" d="M12 4a4 4 0 0 1 4 4 4 4 0 0 1-4 4 4 4 0 0 1-4-4 4 4 0 0 1 4-4m0 10c4.42 0 8 1.79 8 4v2H4v-2c0-2.21 3.58-4 8-4Z"/></svg>
-                            </span>
-                            <input id="username" class="form-input" name="username" value="${(login.username!'')}" type="text" autofocus autocomplete="off" placeholder="Ex: amrani.said" required />
-                        </div>
+                <div class="brand-features">
+                    <div class="feature-item">
+                        <span class="feature-icon">
+                            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M4 19h16v2H4v-2Zm1-7h3v5H5v-5Zm5-5h3v10h-3V7Zm5 3h3v7h-3v-7Z"/></svg>
+                        </span>
+                        <span><strong>Données centralisées</strong><small>Une vision fiable et traçable du parc</small></span>
                     </div>
+                </div>
 
-                    <!-- Password Field -->
-                    <div class="form-group">
-                        <div class="form-label-row">
-                            <label for="password" class="form-label">Mot de passe</label>
-                            <#if realm.resetPasswordAllowed>
-                                <a id="reset-password-link" href="${url.loginResetCredentialsUrl}" class="forgot-password-link">Mot de passe oublié ?</a>
-                            </#if>
-                        </div>
-                        <div class="input-wrapper">
-                            <span class="input-icon">
-                                <svg viewBox="0 0 24 24" class="svg-icon"><path fill="currentColor" d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2Zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2Zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2Z"/></svg>
+                <div class="brand-ministry">Ministère de l'Enseignement Supérieur,<br>de la Recherche Scientifique et de l'Innovation</div>
+            </aside>
+
+            <section class="form-panel">
+                <div class="mobile-brand">
+                    <span class="mobile-emblem">
+                        <svg viewBox="0 0 48 48" width="34" height="34"><path d="M24 4 42 14v20L24 44 6 34V14L24 4Z" fill="none" stroke="currentColor" stroke-width="2"/><path d="m24 12 3.3 7.7 8.3.7-6.3 5.5 1.9 8.1-7.2-4.2-7.2 4.2 1.9-8.1-6.3-5.5 8.3-.7L24 12Z" fill="currentColor"/></svg>
+                    </span>
+                    <span><strong>PARC MESRSI</strong><small>Gestion automobile</small></span>
+                </div>
+
+                <div class="form-content">
+                    <header class="login-header">
+                        <span class="page-kicker">ESPACE SÉCURISÉ</span>
+                        <h2>Bienvenue</h2>
+                        <p>Connectez-vous pour accéder à la gestion du parc automobile.</p>
+                    </header>
+
+                    <#if message?? && (message.type != 'warning' || !isAppInitiatedAction??)>
+                        <div class="alert alert-${message.type}" role="alert">
+                            <span class="alert-icon">
+                                <#if message.type = 'success'>
+                                    <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm-2 15-4-4 1.41-1.41L10 14.17l6.59-6.58L18 11l-8 8Z"/></svg>
+                                <#elseif message.type = 'error'>
+                                    <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm1 15h-2v-2h2Zm0-4h-2V7h2Z"/></svg>
+                                <#else>
+                                    <svg viewBox="0 0 24 24"><path fill="currentColor" d="M11 17h2v-6h-2Zm0-8h2V7h-2Zm1-7a10 10 0 1 0 10 10A10 10 0 0 0 12 2Z"/></svg>
+                                </#if>
                             </span>
-                            <input id="password" class="form-input" name="password" type="password" autocomplete="off" placeholder="••••••••" required />
-                        </div>
-                    </div>
-
-                    <!-- Remember Me -->
-                    <#if realm.rememberMe && !usernameEditDisabled??>
-                        <div class="form-options">
-                            <label class="checkbox-container">
-                                <input id="rememberMe" name="rememberMe" type="checkbox" <#if login.rememberMe??>checked</#if>>
-                                <span class="checkmark"></span>
-                                Se souvenir de moi
-                            </label>
+                            <span class="alert-text">${kcSanitize(message.summary)?no_esc}</span>
                         </div>
                     </#if>
 
-                    <!-- Actions -->
-                    <div class="form-actions">
-                        <button id="login-btn" class="btn btn-primary btn-block" name="login" type="submit">Se connecter</button>
-                    </div>
+                    <#if realm.password>
+                        <form id="kc-form-login" class="login-form" onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="post">
+                            <div class="form-group">
+                                <label for="username" class="form-label">Identifiant ou adresse e-mail</label>
+                                <div class="input-wrapper">
+                                    <span class="input-icon">
+                                        <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 4a4 4 0 1 1-4 4 4 4 0 0 1 4-4Zm0 10c4.42 0 8 1.79 8 4v2H4v-2c0-2.21 3.58-4 8-4Z"/></svg>
+                                    </span>
+                                    <input id="username" class="form-input" name="username" value="${(login.username!'')}" type="text" autofocus autocomplete="username" placeholder="Votre identifiant" required />
+                                </div>
+                            </div>
 
-                </form>
-            </#if>
-        </div>
-    </div>
+                            <div class="form-group">
+                                <div class="form-label-row">
+                                    <label for="password" class="form-label">Mot de passe</label>
+                                    <#if realm.resetPasswordAllowed>
+                                        <a id="reset-password-link" href="${url.loginResetCredentialsUrl}" class="forgot-password-link">Mot de passe oublié ?</a>
+                                    </#if>
+                                </div>
+                                <div class="input-wrapper">
+                                    <span class="input-icon">
+                                        <svg viewBox="0 0 24 24"><path fill="currentColor" d="M18 8h-1V6a5 5 0 0 0-10 0v2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2Zm-6 9a2 2 0 1 1 2-2 2 2 0 0 1-2 2Zm3-9H9V6a3 3 0 0 1 6 0Z"/></svg>
+                                    </span>
+                                    <input id="password" class="form-input" name="password" type="password" autocomplete="current-password" placeholder="Votre mot de passe" required />
+                                </div>
+                            </div>
+
+                            <#if realm.rememberMe && !usernameEditDisabled??>
+                                <div class="form-options">
+                                    <label class="checkbox-container">
+                                        <input id="rememberMe" name="rememberMe" type="checkbox" <#if login.rememberMe??>checked</#if>>
+                                        <span class="checkmark"></span>
+                                        <span>Se souvenir de moi</span>
+                                    </label>
+                                </div>
+                            </#if>
+
+                            <button id="login-btn" class="login-button" name="login" type="submit">
+                                <span>Se connecter</span>
+                                <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="m9.3 17.3 5.3-5.3-5.3-5.3 1.4-1.4 6.7 6.7-6.7 6.7-1.4-1.4Z"/></svg>
+                            </button>
+                        </form>
+                    </#if>
+
+                    <footer class="form-footer">
+                        <span class="security-mark">
+                            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M18 8h-1V6a5 5 0 0 0-10 0v2H6a2 2 0 0 0-2 2v10h12V10a2 2 0 0 0-2-2Zm-3 0H9V6a3 3 0 0 1 6 0Z"/></svg>
+                        </span>
+                        <span>Accès réservé aux utilisateurs habilités du MESRSI</span>
+                    </footer>
+                </div>
+            </section>
+        </section>
+    </main>
 </body>
 </html>

@@ -12,6 +12,7 @@ tmp/
 
 # Build artifacts
 *.log
+backend/target/
 
 # IDEs / editors
 .vscode/

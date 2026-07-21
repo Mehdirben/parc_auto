@@ -1,0 +1,13 @@
+<div class="dialog-backdrop" *ngIf="open" (click)="cancelled.emit()">
+  <section class="dialog" role="alertdialog" aria-modal="true" [attr.aria-label]="title" (click)="$event.stopPropagation()">
+    <div class="dialog-mark" [class.danger]="destructive" aria-hidden="true">!</div>
+    <h2>{{ title }}</h2>
+    <p>{{ message }}</p>
+    <div class="dialog-actions">
+      <button class="btn btn-secondary" type="button" (click)="cancelled.emit()">Annuler</button>
+      <button class="btn" [class.btn-danger]="destructive" [class.btn-primary]="!destructive" type="button" (click)="confirmed.emit()">
+        {{ confirmLabel }}
+      </button>
+    </div>
+  </section>
+</div>

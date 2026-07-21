@@ -1,0 +1,10 @@
+<section class="empty-state" role="status">
+  <div class="empty-icon" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="30" height="30">
+      <path fill="currentColor" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2Zm0 16H5V5h14v14Zm-8-3h2v2h-2v-2Zm0-10h2v8h-2V6Z"/>
+    </svg>
+  </div>
+  <h2>{{ title }}</h2>
+  <p *ngIf="description">{{ description }}</p>
+  <div class="empty-action"><ng-content></ng-content></div>
+</section>

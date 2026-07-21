@@ -1,0 +1,124 @@
+<app-page-header
+  eyebrow="Référentiels"
+  title="Marques et modèles"
+  description="Administrez les constructeurs et les modèles de véhicules disponibles dans le parc.">
+  <button class="btn btn-primary" type="button" (click)="ouvrirCreation()">
+    <svg viewBox="0 0 24 24" width="17" height="17"><path fill="currentColor" d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5Z"/></svg>
+    Ajouter une marque
+  </button>
+</app-page-header>
+
+<section class="summary-grid">
+  <app-summary-card [value]="page.totalElements" label="Marques enregistrées" [icon]="marquesIcon"></app-summary-card>
+  <app-summary-card [value]="statistiques.totalModeles" label="Modèles enregistrés" [icon]="modelesIcon" tone="gold"></app-summary-card>
+</section>
+
+<section class="panel list-panel">
+  <app-search-toolbar
+    [control]="recherche"
+    placeholder="Rechercher une marque…"
+    ariaLabel="Rechercher une marque"
+    (refreshed)="charger()">
+  </app-search-toolbar>
+
+  <app-data-table *ngIf="!chargement && page.contenu.length">
+    <table class="data-table">
+      <thead><tr><th>Code</th><th>Désignation</th><th>Modèles</th><th>Création</th><th class="actions-column">Actions</th></tr></thead>
+      <tbody>
+        <tr *ngFor="let marque of page.contenu; trackBy: identifierMarque">
+          <td><span class="code-chip">{{ marque.code }}</span></td>
+          <td><button class="brand-link" type="button" (click)="consulter(marque)">{{ marque.designation }}</button></td>
+          <td><span class="model-count">{{ marque.nombreModeles }} modèle{{ marque.nombreModeles > 1 ? 's' : '' }}</span></td>
+          <td><div class="audit-cell"><span>{{ marque.dateCreation | date:'dd/MM/yyyy' }}</span><small>par {{ marque.creePar }}</small></div></td>
+          <td class="actions-cell">
+            <app-table-action kind="view" (triggered)="consulter(marque)"></app-table-action>
+            <app-table-action kind="edit" (triggered)="ouvrirModification(marque)"></app-table-action>
+            <app-table-action kind="delete" (triggered)="demanderSuppressionMarque(marque)"></app-table-action>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </app-data-table>
+
+  <app-table-loading *ngIf="chargement"></app-table-loading>
+
+  <app-empty-state *ngIf="!chargement && !page.contenu.length && !erreur" title="Aucune marque trouvée" [description]="recherche.value ? 'Aucun résultat ne correspond à votre recherche.' : 'Commencez par ajouter la première marque du référentiel.'">
+    <button class="btn btn-primary" type="button" *ngIf="!recherche.value" (click)="ouvrirCreation()">Ajouter une marque</button>
+  </app-empty-state>
+
+  <app-empty-state *ngIf="!chargement && erreur" title="Chargement impossible" [description]="erreur">
+    <button class="btn btn-secondary" type="button" (click)="charger()">Réessayer</button>
+  </app-empty-state>
+
+  <app-pagination
+    *ngIf="!chargement"
+    [page]="page.page"
+    [pageSize]="page.taille"
+    [totalItems]="page.totalElements"
+    [totalPages]="page.totalPages"
+    [first]="page.premiere"
+    [last]="page.derniere"
+    (pageChange)="charger($event)">
+  </app-pagination>
+</section>
+
+<app-detail-drawer
+  [open]="chargementDetail || !!selection"
+  [loading]="chargementDetail"
+  loadingText="Chargement de la marque…"
+  eyebrow="Fiche marque"
+  [title]="selection?.designation || ''"
+  [code]="selection?.code || ''"
+  ariaLabel="Détail de la marque"
+  (closed)="fermerDetail()">
+  <ng-container *ngIf="selection as marque">
+    <section class="detail-section">
+      <div class="section-title"><div><span>Modèles rattachés</span><strong>{{ marque.modeles.length }}</strong></div><button class="btn btn-primary btn-compact" type="button" (click)="ouvrirAjoutModele()">+ Ajouter</button></div>
+      <div class="models-list" *ngIf="marque.modeles.length; else noModels">
+        <article *ngFor="let modele of marque.modeles; trackBy: identifierModele">
+          <span class="model-avatar">{{ modele.nom.slice(0, 2).toUpperCase() }}</span>
+          <strong>{{ modele.nom }}</strong>
+          <app-table-action kind="edit" label="Modifier le modèle" (triggered)="ouvrirModificationModele(modele)"></app-table-action>
+          <app-table-action kind="delete" label="Supprimer le modèle" (triggered)="demanderSuppressionModele(modele)"></app-table-action>
+        </article>
+      </div>
+      <ng-template #noModels><div class="no-models"><p>Aucun modèle rattaché à cette marque.</p><button class="btn btn-secondary btn-compact" type="button" (click)="ouvrirAjoutModele()">Ajouter des modèles</button></div></ng-template>
+    </section>
+    <app-audit-trail [createdAt]="marque.dateCreation" [createdBy]="marque.creePar" [updatedAt]="marque.dateModification" [updatedBy]="marque.modifiePar || ''"></app-audit-trail>
+  </ng-container>
+</app-detail-drawer>
+
+<app-form-modal
+  [open]="marqueDialogOuvert"
+  [eyebrow]="marqueDialogMode === 'create' ? 'Nouvelle entrée' : 'Modification'"
+  [title]="marqueDialogMode === 'create' ? 'Ajouter une marque' : 'Modifier la marque'"
+  (closed)="marqueDialogOuvert = false">
+  <form [formGroup]="marqueForm" (ngSubmit)="enregistrerMarque()">
+    <app-form-field label="Désignation" controlId="designation" [required]="true" [error]="marqueForm.controls.designation.touched && marqueForm.controls.designation.invalid ? 'La désignation est obligatoire (80 caractères maximum).' : ''"><input class="form-control" id="designation" [formControl]="marqueForm.controls.designation" maxlength="80" placeholder="Ex. Renault"></app-form-field>
+    <app-toggle-field *ngIf="marqueDialogMode === 'create'" [control]="marqueForm.controls.ajouterModeles" label="Ajouter des modèles maintenant" help="Vous pourrez aussi les ajouter ultérieurement."></app-toggle-field>
+    <app-form-field *ngIf="marqueDialogMode === 'create' && marqueForm.controls.ajouterModeles.value" label="Nom(s) des modèles" controlId="modeles" [required]="true" help="Séparez plusieurs modèles par un point-virgule « ; »." [error]="marqueForm.controls.modeles.touched && marqueForm.controls.modeles.invalid ? 'Saisissez au moins un modèle.' : ''"><textarea class="form-control" id="modeles" [formControl]="marqueForm.controls.modeles" rows="4" placeholder="Clio ; Captur ; Austral"></textarea></app-form-field>
+    <footer><button class="btn btn-secondary" type="button" (click)="marqueDialogOuvert = false">Annuler</button><button class="btn btn-primary" type="submit" [disabled]="enregistrement"><span class="button-spinner" *ngIf="enregistrement"></span>{{ marqueDialogMode === 'create' ? 'Créer la marque' : 'Enregistrer' }}</button></footer>
+  </form>
+</app-form-modal>
+
+<app-form-modal
+  [open]="modeleDialogOuvert"
+  [eyebrow]="modeleDialogMode === 'create' ? 'Ajout multiple possible' : 'Modification'"
+  [title]="modeleDialogMode === 'create' ? 'Ajouter des modèles' : 'Modifier le modèle'"
+  size="small"
+  (closed)="modeleDialogOuvert = false">
+  <form [formGroup]="modeleForm" (ngSubmit)="enregistrerModele()">
+    <app-form-field [label]="modeleDialogMode === 'create' ? 'Nom(s) des modèles' : 'Nom du modèle'" controlId="nomModele" [required]="true" [help]="modeleDialogMode === 'create' ? 'Séparez les modèles avec « ; ».' : ''" [error]="modeleForm.controls.nom.touched && modeleForm.controls.nom.invalid ? 'Le nom est obligatoire.' : ''"><textarea class="form-control" id="nomModele" [formControl]="modeleForm.controls.nom" rows="3" maxlength="500" [placeholder]="modeleDialogMode === 'create' ? 'Clio ; Captur ; Austral' : 'Clio'"></textarea></app-form-field>
+    <footer><button class="btn btn-secondary" type="button" (click)="modeleDialogOuvert = false">Annuler</button><button class="btn btn-primary" type="submit" [disabled]="enregistrement">Enregistrer</button></footer>
+  </form>
+</app-form-modal>
+
+<app-confirm-dialog
+  [open]="!!suppression"
+  [destructive]="true"
+  title="Confirmer la suppression"
+  [message]="'Voulez-vous supprimer « ' + (suppression?.libelle || '') + ' » ? Cette action sera refusée si la donnée est utilisée par un véhicule.'"
+  confirmLabel="Supprimer"
+  (cancelled)="suppression = null"
+  (confirmed)="confirmerSuppression()">
+</app-confirm-dialog>

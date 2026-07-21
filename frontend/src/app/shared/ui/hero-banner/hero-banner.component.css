@@ -1,0 +1,11 @@
+.hero-banner { position: relative; display: flex; min-height: 190px; margin-bottom: 22px; padding: 31px 34px; align-items: center; justify-content: space-between; overflow: hidden; color: #fff; background: linear-gradient(120deg, var(--color-primary-800), #176659); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); }
+.hero-banner::before { position: absolute; top: -90px; right: 70px; width: 230px; height: 230px; content: ''; border: 1px solid rgba(255,255,255,.12); border-radius: 50%; }
+.hero-banner::after { position: absolute; right: -65px; bottom: -140px; width: 300px; height: 300px; content: ''; background: rgba(214,184,90,.1); border-radius: 50%; }
+.hero-copy { position: relative; z-index: 1; max-width: 590px; }
+.hero-copy span { display: block; margin-bottom: 5px; color: #d9bd67; font-size: .63rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.hero-copy h2 { font-size: clamp(1.35rem, 2.3vw, 1.85rem); line-height: 1.25; }
+.hero-copy p { max-width: 570px; margin-top: 9px; color: #d8e7e3; font-size: .81rem; line-height: 1.65; }
+.hero-art { position: relative; z-index: 1; width: min(29%, 250px); color: #d8be69; }
+.hero-art svg { display: block; width: 100%; }
+@media (max-width: 700px) { .hero-banner { min-height: 210px; padding: 26px 22px; }.hero-art { display: none; } }
+:host { display: block; }

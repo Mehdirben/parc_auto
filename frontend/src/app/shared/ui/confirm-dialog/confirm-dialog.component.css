@@ -1,0 +1,41 @@
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  padding: 20px;
+  place-items: center;
+  background: rgba(15, 23, 42, .56);
+  backdrop-filter: blur(3px);
+}
+
+.dialog {
+  width: min(440px, 100%);
+  padding: 28px;
+  text-align: center;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+}
+
+.dialog-mark {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 16px;
+  place-items: center;
+  color: var(--color-primary-700);
+  font-size: 1.35rem;
+  font-weight: 800;
+  background: var(--color-primary-50);
+  border-radius: 50%;
+}
+
+.dialog-mark.danger {
+  color: var(--color-danger-700);
+  background: var(--color-danger-50);
+}
+
+h2 { color: var(--color-ink); font-size: 1.2rem; }
+p { margin-top: 9px; color: var(--color-muted); font-size: .9rem; line-height: 1.55; }
+.dialog-actions { display: flex; justify-content: center; gap: 10px; margin-top: 24px; }
