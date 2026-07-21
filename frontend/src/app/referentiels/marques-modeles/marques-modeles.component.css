@@ -1,0 +1,23 @@
+.summary-grid { display: grid; margin-bottom: 18px; grid-template-columns: repeat(2, minmax(220px, 1fr)); gap: 14px; }
+
+.list-panel { overflow: hidden; }
+.actions-column { text-align: right !important; }
+.actions-cell { display: flex; justify-content: flex-end; gap: 5px; }
+.code-chip { padding: 5px 8px; color: var(--color-primary-700); font-family: monospace; font-size: .69rem; font-weight: 700; background: var(--color-primary-50); border-radius: 6px; }
+.brand-link { color: var(--color-ink); font-size: .78rem; font-weight: 750; text-align: left; background: none; border: 0; cursor: pointer; }
+.brand-link:hover { color: var(--color-primary-600); text-decoration: underline; }
+.model-count { color: var(--color-muted); font-size: .7rem; }
+.audit-cell { display: flex; flex-direction: column; }
+.audit-cell span { color: var(--color-text); font-size: .72rem; }
+.audit-cell small { margin-top: 2px; color: var(--color-muted); font-size: .59rem; }
+
+.detail-section { margin-bottom: 25px; }.section-title { display: flex; margin-bottom: 12px; align-items: center; justify-content: space-between; }
+.section-title > div { display: flex; align-items: center; gap: 8px; }.section-title span, .audit-section h3 { color: var(--color-ink); font-size: .77rem; font-weight: 800; }.section-title strong { display: grid; width: 22px; height: 22px; place-items: center; color: var(--color-primary-700); font-size: .59rem; background: var(--color-primary-50); border-radius: 50%; }
+.models-list { display: grid; gap: 8px; }.models-list article { display: grid; min-height: 54px; padding: 8px 9px; align-items: center; grid-template-columns: 34px 1fr auto auto; gap: 8px; background: var(--color-surface-muted); border: 1px solid var(--color-border); border-radius: 9px; }
+.model-avatar { display: grid; width: 32px; height: 32px; place-items: center; color: var(--color-primary-700); font-size: .61rem; font-weight: 800; background: var(--color-primary-50); border-radius: 8px; }.models-list strong { color: var(--color-ink); font-size: .73rem; }
+.no-models { padding: 25px; text-align: center; background: var(--color-surface-muted); border: 1px dashed var(--color-border-strong); border-radius: 10px; }.no-models p { margin-bottom: 12px; color: var(--color-muted); font-size: .7rem; }
+.button-spinner { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.4); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 760px) { .summary-grid { grid-template-columns: 1fr; } }
+

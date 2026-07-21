@@ -1,0 +1,9 @@
+:host { display: block; min-width: 0; }
+.summary-card { display: flex; height: 100%; padding: 16px 18px; align-items: center; gap: 13px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); }
+.summary-icon { display: grid; width: 42px; height: 42px; flex: 0 0 42px; place-items: center; color: var(--color-primary-700); background: var(--color-primary-50); border-radius: 11px; }
+.summary-icon.gold { color: #86680f; background: #fff8df; }
+.summary-icon svg { width: 21px; height: 21px; }
+.summary-card div { display: flex; flex-direction: column; }
+.summary-card strong { color: var(--color-ink); font-size: 1.05rem; }
+.summary-card span:not(.summary-icon) { margin-top: 2px; color: var(--color-muted); font-size: .66rem; }
+

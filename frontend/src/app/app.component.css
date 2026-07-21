@@ -1,194 +1,22 @@
-/* App shell layout (header + routed content area) */
-:host {
-  display: block;
+:host { display: block; min-height: 100vh; }
+
+.app-layout {
+  --sidebar-width: 272px;
+  display: grid;
   min-height: 100vh;
-  background-color: #F1F5F9; /* Slate 100 */
-  color: #1E293B; /* Slate 800 */
-  font-family: 'Outfit', sans-serif;
+  grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+  transition: grid-template-columns .22s ease;
 }
 
-.dashboard-container {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+.app-layout.sidebar-collapsed { --sidebar-width: 82px; }
+.main-column { min-width: 0; }
+.app-content { width: min(100%, 1480px); margin: 0 auto; padding: 30px; }
+.mobile-backdrop { display: none; }
+
+@media (max-width: 1024px) {
+  .app-layout { display: block; }
+  .mobile-backdrop { position: fixed; inset: 0; z-index: 250; display: block; visibility: hidden; background: rgba(15,23,42,.45); opacity: 0; transition: opacity .2s, visibility .2s; }
+  .mobile-backdrop.visible { visibility: visible; opacity: 1; }
 }
 
-/* Header */
-.app-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 40px;
-  background-color: #0F2C59;
-  color: #FFFFFF;
-  box-shadow: 0 4px 12px rgba(15, 44, 89, 0.15);
-  border-bottom: 2px solid #D4AF37;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.logo-icon {
-  filter: drop-shadow(0 2px 4px rgba(212, 175, 55, 0.3));
-}
-
-.brand-text {
-  display: flex;
-  flex-direction: column;
-}
-
-.brand-main {
-  font-size: 1.15rem;
-  font-weight: 700;
-  letter-spacing: 1px;
-}
-
-.brand-sub {
-  font-size: 0.75rem;
-  color: #D4AF37;
-  font-weight: 500;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-/* User profile pill */
-.user-pill {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: rgba(255, 255, 255, 0.1);
-  padding: 6px 14px 6px 6px;
-  border-radius: 30px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.user-pill:hover {
-  background: rgba(255, 255, 255, 0.18);
-  border-color: #D4AF37;
-}
-
-.avatar {
-  width: 32px;
-  height: 32px;
-  background-color: #D4AF37;
-  color: #0F2C59;
-  font-weight: 700;
-  font-size: 0.85rem;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.user-meta {
-  display: flex;
-  flex-direction: column;
-  text-align: left;
-}
-
-.user-name {
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
-.user-role {
-  font-size: 0.7rem;
-  color: #CBD5E1;
-  font-weight: 500;
-}
-
-/* Buttons */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  border: none;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-logout {
-  background-color: #EF4444;
-  color: #FFFFFF;
-}
-
-.btn-logout:hover {
-  background-color: #DC2626;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
-  transform: translateY(-1px);
-}
-
-.btn-login {
-  background-color: #D4AF37;
-  color: #0F2C59;
-}
-
-.btn-login:hover {
-  background-color: #B5942B;
-  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
-  transform: translateY(-1px);
-}
-
-/* Main content area: routed views render here */
-.dashboard-content {
-  flex-grow: 1;
-  max-width: 1280px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 40px;
-}
-
-.service-status {
-  min-height: calc(100vh - 180px);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 18px;
-  text-align: center;
-  color: #334155;
-}
-
-.status-icon {
-  color: #D4AF37;
-}
-
-.service-status h1 {
-  color: #0F2C59;
-  font-size: 1.7rem;
-  font-weight: 700;
-}
-
-.service-status p {
-  max-width: 520px;
-  color: #64748B;
-  font-size: 0.98rem;
-  line-height: 1.6;
-}
-
-/* Responsiveness */
-@media (max-width: 768px) {
-  .app-header {
-    padding: 16px 20px;
-  }
-
-  .dashboard-content {
-    padding: 20px;
-  }
-}
+@media (max-width: 700px) { .app-content { padding: 22px 16px; } }

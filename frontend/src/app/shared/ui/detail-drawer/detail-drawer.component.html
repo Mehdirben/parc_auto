@@ -1,0 +1,13 @@
+<ng-container *ngIf="open">
+  <div class="app-drawer-backdrop" (click)="closed.emit()"></div>
+  <aside class="app-detail-drawer" [attr.aria-label]="ariaLabel">
+    <div class="app-drawer-loading" *ngIf="loading; else drawerContent"><span class="app-spinner"></span><p>{{ loadingText }}</p></div>
+    <ng-template #drawerContent>
+      <header class="app-drawer-header">
+        <div><span *ngIf="eyebrow">{{ eyebrow }}</span><h2>{{ title }}</h2><small *ngIf="code">{{ code }}</small></div>
+        <button type="button" aria-label="Fermer" (click)="closed.emit()">×</button>
+      </header>
+      <div class="app-drawer-content"><ng-content></ng-content></div>
+    </ng-template>
+  </aside>
+</ng-container>

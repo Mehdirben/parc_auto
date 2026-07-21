@@ -1,71 +1,26 @@
-<!-- Production-style error view when authentication is unavailable -->
-<div class="dashboard-container" *ngIf="keycloakError; else appShell">
-  <header class="app-header">
-    <div class="header-left">
-      <svg viewBox="0 0 100 100" class="logo-icon" width="40" height="40">
-        <polygon points="50,10 90,30 90,70 50,90 10,70 10,30" fill="none" stroke="#D4AF37" stroke-width="3" />
-        <polygon points="50,18 82,34 82,66 50,82 18,66 18,34" fill="none" stroke="#FFFFFF" stroke-width="2" />
-        <path d="M50,25 L65,65 L30,40 L70,40 L35,65 Z" fill="#D4AF37" />
-      </svg>
-      <div class="brand-text">
-        <span class="brand-main">PARC MESRSI</span>
-        <span class="brand-sub">Gestion du Parc Automobile</span>
-      </div>
-    </div>
-  </header>
+<app-service-unavailable *ngIf="keycloakError; else appShell" (retried)="reloadPage()"></app-service-unavailable>
 
-  <main class="dashboard-content">
-    <div class="service-status">
-      <svg viewBox="0 0 24 24" class="status-icon" width="40" height="40" aria-hidden="true">
-        <path fill="currentColor" d="M12 2a10 10 0 1 0 10 10A10.011 10.011 0 0 0 12 2Zm1 15h-2v-2h2Zm0-4h-2V7h2Z"/>
-      </svg>
-      <h1>Service momentanément indisponible</h1>
-      <p>Le service d'authentification est temporairement inaccessible. Veuillez réessayer dans quelques instants.</p>
-      <button class="btn btn-login" type="button" (click)="reloadPage()">
-        Réessayer
-      </button>
-    </div>
-  </main>
-</div>
-
-<!-- Normal app shell: header + routed views -->
 <ng-template #appShell>
-  <div class="dashboard-container">
-    <header class="app-header">
-      <div class="header-left">
-        <svg viewBox="0 0 100 100" class="logo-icon" width="40" height="40">
-          <polygon points="50,10 90,30 90,70 50,90 10,70 10,30" fill="none" stroke="#D4AF37" stroke-width="3" />
-          <polygon points="50,18 82,34 82,66 50,82 18,66 18,34" fill="none" stroke="#FFFFFF" stroke-width="2" />
-          <path d="M50,25 L65,65 L30,40 L70,40 L35,65 Z" fill="#D4AF37" />
-        </svg>
-        <div class="brand-text">
-          <span class="brand-main">PARC MESRSI</span>
-          <span class="brand-sub">Gestion du Parc Automobile</span>
-        </div>
-      </div>
-      <div class="header-right" *ngIf="isAuthenticated">
-        <div class="user-pill" (click)="manageAccount()">
-          <div class="avatar">{{ userInitials }}</div>
-          <div class="user-meta">
-            <span class="user-name">{{ fullName }}</span>
-            <span class="user-role" *ngIf="primaryRole">{{ primaryRole | titlecase }}</span>
-          </div>
-        </div>
-        <button class="btn btn-logout" (click)="logout()">
-          <svg viewBox="0 0 24 24" width="18" height="18" class="icon-svg"><path fill="currentColor" d="M16 17v-3H9v-4h7V7l5 5-5 5M14 2a2 2 0 0 1 2 2v2h-2V4H5v16h9v-2h2v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9Z"/></svg>
-          Déconnexion
-        </button>
-      </div>
-      <div class="header-right" *ngIf="!isAuthenticated">
-        <button class="btn btn-login" (click)="login()">
-          <svg viewBox="0 0 24 24" width="18" height="18" class="icon-svg"><path fill="currentColor" d="M16 17v-3H9v-4h7V7l5 5-5 5M14 2a2 2 0 0 1 2 2v2h-2V4H5v16h9v-2h2v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9Z"/></svg>
-          Connexion
-        </button>
-      </div>
-    </header>
+  <div class="app-layout" [class.sidebar-collapsed]="sidebarCollapsed">
+    <div class="mobile-backdrop" [class.visible]="sidebarOpen" (click)="sidebarOpen = false"></div>
 
-    <main class="dashboard-content">
-      <router-outlet></router-outlet>
-    </main>
+    <app-sidebar [items]="visibleNavigation" [open]="sidebarOpen" [collapsed]="sidebarCollapsed" (closed)="sidebarOpen = false" (collapsedChange)="sidebarCollapsed = $event"></app-sidebar>
+
+    <div class="main-column">
+      <app-topbar [authenticated]="isAuthenticated" [initials]="userInitials" [fullName]="fullName" [role]="primaryRole" (menuOpened)="toggleSidebar()" (accountOpened)="manageAccount()" (loggedIn)="login()" (loggedOut)="logout()"></app-topbar>
+
+      <main class="app-content">
+        <router-outlet></router-outlet>
+      </main>
+    </div>
   </div>
+  <app-toast-container></app-toast-container>
+
+  <app-session-timeout-modal
+    [visible]="(inactivity.showWarning$ | async) === true"
+    [countdown]="(inactivity.countdown$ | async) ?? 60"
+    (extended)="inactivity.extendSession()"
+    (loggedOut)="logout()">
+  </app-session-timeout-modal>
 </ng-template>
+

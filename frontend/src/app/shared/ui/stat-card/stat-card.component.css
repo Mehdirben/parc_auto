@@ -1,0 +1,10 @@
+:host { display: block; min-width: 0; }
+.stat-card { display: flex; min-width: 0; padding: 18px; align-items: center; gap: 13px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); }
+.stat-icon { display: grid; width: 43px; height: 43px; flex: 0 0 43px; place-items: center; color: var(--color-primary-700); background: var(--color-primary-50); border-radius: 11px; }
+.stat-icon.gold { color: #8d6d10; background: #fff8df; }
+.stat-icon.blue { color: #2e6094; background: #eef6ff; }
+.stat-icon.slate { color: #5e6d69; background: #f0f3f2; }
+.stat-copy { display: flex; min-width: 0; flex-direction: column; }
+.stat-copy span { overflow: hidden; color: var(--color-muted); font-size: .67rem; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+.stat-copy strong { margin-top: 2px; color: var(--color-ink); font-size: 1.35rem; }
+

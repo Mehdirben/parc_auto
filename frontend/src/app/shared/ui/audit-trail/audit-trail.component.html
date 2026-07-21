@@ -1,0 +1,9 @@
+<section class="audit-trail">
+  <h3>Traçabilité</h3>
+  <dl>
+    <div><dt>Créée le</dt><dd>{{ createdAt | date:'dd/MM/yyyy à HH:mm' }}</dd></div>
+    <div><dt>Créée par</dt><dd>{{ createdBy }}</dd></div>
+    <div *ngIf="updatedAt"><dt>Modifiée le</dt><dd>{{ updatedAt | date:'dd/MM/yyyy à HH:mm' }}</dd></div>
+    <div *ngIf="updatedBy"><dt>Modifiée par</dt><dd>{{ updatedBy }}</dd></div>
+  </dl>
+</section>

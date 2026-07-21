@@ -1,0 +1,14 @@
+<div class="crud-toolbar">
+  <div class="crud-search-box">
+    <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><path fill="currentColor" d="M9.5 3a6.5 6.5 0 1 0 4.1 11.54L19.06 20 20.5 18.56l-5.46-5.46A6.5 6.5 0 0 0 9.5 3Zm0 2a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Z"/></svg>
+    <input type="search" [formControl]="control" [placeholder]="placeholder" [attr.aria-label]="ariaLabel">
+    <button type="button" *ngIf="control.value" aria-label="Effacer la recherche" (click)="control.setValue('')">×</button>
+  </div>
+  <div class="crud-toolbar-actions">
+    <ng-content></ng-content>
+    <button class="btn btn-secondary btn-compact" type="button" (click)="refreshed.emit()">
+      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M17.65 6.35A7.95 7.95 0 0 0 12 4a8 8 0 1 0 7.75 10h-2.1A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h8V3l-3.35 3.35Z"/></svg>
+      {{ refreshLabel }}
+    </button>
+  </div>
+</div>

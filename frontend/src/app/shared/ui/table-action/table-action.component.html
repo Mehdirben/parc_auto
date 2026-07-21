@@ -1,0 +1,3 @@
+<button class="crud-table-action" [class.danger]="kind === 'delete'" type="button" [title]="accessibleLabel" [attr.aria-label]="accessibleLabel" (click)="triggered.emit()">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" [attr.d]="paths[kind]"/></svg>
+</button>

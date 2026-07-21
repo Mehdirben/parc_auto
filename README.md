@@ -1,15 +1,20 @@
 # Gestion du Parc Automobile — MESRSI
 
 Web application for managing the Moroccan Ministry of Higher Education's
-vehicle fleet. Built with **Angular 18** (standalone components) on the
-front end, secured by **Keycloak 24** (with a custom branded login theme),
-and deployed with **Docker Compose** + **nginx**.
+vehicle fleet. Built with **Angular 18** (standalone components), a
+**Spring Boot 3.5 / Java 21** REST API, **SQL Server**, and secured by
+**Keycloak 24** with a custom branded login theme.
 
 ## Project layout
 
 ```
 .
-├── docker-compose.yml        # Frontend (Angular + nginx)
+├── docker-compose.yml        # SQL Server + Spring Boot + Angular/nginx
+├── backend/                  # Spring Boot REST API
+│   ├── src/main/java/        # Domain, services, REST and security
+│   ├── src/main/resources/   # Configuration + Flyway SQL migrations
+│   ├── src/test/             # Business-rule tests
+│   └── Dockerfile
 ├── frontend/                 # Angular 18 SPA
 │   ├── src/
 │   │   ├── app/
@@ -40,14 +45,39 @@ and deployed with **Docker Compose** + **nginx**.
 cd keycloak
 docker compose up -d
 
-# 2. From the project root, start the frontend
+# 2. From the project root, start SQL Server, the API and the frontend
 cd ..
 docker compose up -d --build
 ```
 
-The application is then available at <http://localhost:4205> and Keycloak's
-admin console at <http://localhost:8085>. Use the credentials from
-`keycloak/.env`.
+The application is then available at <http://localhost:4205>, the API at
+<http://localhost:8080>, SQL Server at `localhost:1433`, and Keycloak's admin
+console at <http://localhost:8085>. Flyway creates the `marques` and `modeles`
+tables automatically when the API starts.
+
+## Partie 1 — Marques et modèles
+
+The first business module provides:
+
+- paginated brand listing and search;
+- brand creation, update, consultation and protected deletion;
+- single or bulk model entry using `;` as a separator;
+- model update and protected deletion;
+- case-insensitive uniqueness constraints at API and database levels;
+- creation/modification audit fields populated from the Keycloak identity.
+
+REST endpoints are exposed below `/api/v1`:
+
+| Method | Endpoint | Purpose |
+|--------|----------|---------|
+| `GET` | `/marques` | Search and paginate brands |
+| `POST` | `/marques` | Create a brand with optional models |
+| `GET` | `/marques/{code}` | Read a brand and its models |
+| `PUT` | `/marques/{code}` | Update a brand |
+| `DELETE` | `/marques/{code}` | Delete an unused brand |
+| `POST` | `/marques/{code}/modeles` | Add one or more models |
+| `PUT` | `/modeles/{id}` | Update a model |
+| `DELETE` | `/modeles/{id}` | Delete an unused model |
 
 ## One-time Keycloak configuration
 
@@ -125,7 +155,30 @@ Repeat for any other role you need (e.g. `gestionnaire`).
 Self-registration is intentionally disabled — every account is created by
 the administrator in this way.
 
-### 6. Test it
+### 6. Configure Session & Token Lifespans
+
+To balance enterprise security and data loss prevention:
+
+**Realm settings** → **Sessions** tab:
+- **SSO Session Idle:** `30` `Minutes` (or `2` `Hours` if you allow closed tabs to stay logged in up to 2 hours)
+- **SSO Session Max:** `10` `Hours` (full workday limit)
+
+**Realm settings** → **Tokens** tab:
+- **Access Token Lifespan:** `5` `Minutes` (short-lived tokens for security)
+- **Revoke Refresh Token:** `ON` (enables refresh token rotation)
+
+#### Architecture: Session Management & Inactivity Handling
+
+The application uses a hybrid client/server session management model:
+
+| State | Handling Mechanism | Behavior |
+| :--- | :--- | :--- |
+| **Active User (Tab Open)** | `InactivityService` + `keycloakBearerInterceptor` | Refreshes token on user activity (throttled every 2 min) and before API calls, resetting Keycloak's server idle timer. |
+| **Idle User (Tab Open, >30m)** | `InactivityService` + `SessionTimeoutModalComponent` | Shows a warning modal with a 60s countdown. User can click "Rester connecté" to extend, or auto-logouts upon expiration. |
+| **Closed Tab / Browser** | Server-side `SSO Session Idle` | Zero refresh requests are sent. Keycloak invalidates the session on the server after 30 minutes. |
+| **End of Workday (>10h)** | Server-side `SSO Session Max` | Session expires on Keycloak server regardless of activity, forcing a fresh daily login. |
+
+### 7. Test it
 
 Visit <http://localhost:4205>. The app loads the shell (no redirect). Click
 **Connexion** in the header → you land on the branded login page → after
@@ -140,6 +193,20 @@ cd frontend
 npm install
 npm start          # ng serve on http://localhost:4200
 ```
+
+The Angular development server proxies `/api` to `http://localhost:8080`.
+
+Start SQL Server with Docker, then run the backend locally:
+
+```bash
+docker compose up -d sqlserver sqlserver-init
+
+cd backend
+export DB_PASSWORD='the same MSSQL_SA_PASSWORD value used in .env'
+mvn spring-boot:run
+```
+
+The backend targets Java 21 and requires Maven 3.6.3 or later.
 
 The dev server points at `http://localhost:8085` for Keycloak by default
 (see `src/environments/environment.ts`). Adjust those values if your

@@ -1,0 +1,11 @@
+.app-drawer-backdrop { position: fixed; inset: 0; z-index: 600; background: rgba(15,23,42,.35); backdrop-filter: blur(2px); }
+.app-detail-drawer { position: fixed; top: 0; right: 0; z-index: 610; width: min(470px, 100vw); height: 100vh; overflow-y: auto; background: var(--color-surface); box-shadow: -18px 0 45px rgba(13,42,35,.16); }
+.app-drawer-header { display: flex; min-height: 112px; padding: 27px 26px; align-items: flex-start; justify-content: space-between; color: #fff; background: linear-gradient(125deg, var(--color-primary-800), var(--color-primary-600)); }
+.app-drawer-header span { color: #d9bd67; font-size: .61rem; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
+.app-drawer-header h2 { margin-top: 5px; font-size: 1.35rem; }
+.app-drawer-header small { display: block; margin-top: 4px; color: #cfe1dd; font-family: monospace; font-size: .67rem; }
+.app-drawer-header button { color: inherit; font-size: 1.5rem; background: none; border: 0; cursor: pointer; }
+.app-drawer-content { padding: 23px; }
+.app-drawer-loading { display: grid; height: 100%; place-content: center; justify-items: center; gap: 12px; color: var(--color-muted); font-size: .75rem; }
+.app-spinner { width: 28px; height: 28px; border: 3px solid var(--color-primary-100); border-top-color: var(--color-primary-600); border-radius: 50%; animation: app-spin .7s linear infinite; }
+@keyframes app-spin { to { transform: rotate(360deg); } }

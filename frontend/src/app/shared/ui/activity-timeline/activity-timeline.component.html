@@ -1,0 +1,10 @@
+<section class="activity-timeline">
+  <h3>{{ title }}</h3>
+  <ol *ngIf="items.length; else empty">
+    <li *ngFor="let item of items" [attr.data-tone]="item.tone || 'green'">
+      <span class="marker"></span>
+      <div><strong>{{ item.label }}</strong><small>{{ item.date | date:'dd/MM/yyyy à HH:mm' }} · {{ item.user }}</small></div>
+    </li>
+  </ol>
+  <ng-template #empty><p>Aucune activité enregistrée.</p></ng-template>
+</section>

@@ -1,0 +1,112 @@
+.timeout-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: grid;
+  padding: 20px;
+  place-items: center;
+  background: rgba(15, 23, 42, .62);
+  backdrop-filter: blur(5px);
+  animation: fadeIn .2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.timeout-dialog {
+  width: min(420px, 100%);
+  padding: 32px 28px 28px;
+  text-align: center;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  animation: slideUp .25s ease;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.timeout-icon {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 16px;
+  place-items: center;
+  color: var(--color-warning-700);
+  background: var(--color-warning-50);
+  border-radius: 50%;
+}
+
+h2 {
+  color: var(--color-ink);
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+p {
+  margin-top: 6px;
+  color: var(--color-muted);
+  font-size: .85rem;
+  line-height: 1.5;
+}
+
+.countdown-display {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0 8px;
+}
+
+.countdown-ring {
+  position: relative;
+  display: grid;
+  width: 80px;
+  height: 80px;
+  place-items: center;
+}
+
+.countdown-ring svg {
+  position: absolute;
+  inset: 0;
+  transform: rotate(-90deg);
+}
+
+.ring-bg {
+  fill: none;
+  stroke: var(--color-border);
+  stroke-width: 4;
+}
+
+.ring-progress {
+  fill: none;
+  stroke: var(--color-warning-700);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-dasharray: 213.6;
+  transition: stroke-dashoffset .95s linear;
+}
+
+.countdown-value {
+  position: relative;
+  z-index: 1;
+  color: var(--color-ink);
+  font-size: 1.35rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.timeout-hint {
+  margin-top: 2px;
+  color: var(--color-muted);
+  font-size: .78rem;
+}
+
+.timeout-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 24px;
+}
