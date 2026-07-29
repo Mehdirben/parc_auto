@@ -28,19 +28,18 @@ import { TableActionComponent } from "../../shared/ui/table-action/table-action.
 import { TableLoadingComponent } from "../../shared/ui/table-loading/table-loading.component";
 import {
   ApiProblem,
+  ConducteurDetail,
+  ConducteurListe,
+  ConducteurStatistiques,
   PageResponse,
-  ServiceParcDetail,
-  ServiceParcListe,
-  ServiceParcStatistiques,
-  TypeServiceParc,
-} from "./service-parc.models";
-import { ServiceParcService } from "./service-parc.service";
+} from "./conducteur.models";
+import { ConducteurService } from "./conducteur.service";
 
 type DialogMode = "create" | "edit";
 type StatutFiltre = "" | "actif" | "inactif";
 
 @Component({
-  selector: "app-services-parcs",
+  selector: "app-conducteurs",
   standalone: true,
   imports: [
     CommonModule,
@@ -60,69 +59,64 @@ type StatutFiltre = "" | "actif" | "inactif";
     TableActionComponent,
     TableLoadingComponent,
   ],
-  templateUrl: "./services-parcs.component.html",
-  styleUrls: ["./services-parcs.component.css"],
+  templateUrl: "./conducteurs.component.html",
+  styleUrls: ["./conducteurs.component.css"],
 })
-export class ServicesParcsComponent implements OnInit, OnDestroy {
-  private readonly service = inject(ServiceParcService);
+export class ConducteursComponent implements OnInit, OnDestroy {
+  private readonly service = inject(ConducteurService);
   private readonly toast = inject(ToastService);
   private readonly destroy$ = new Subject<void>();
 
-  readonly buildingIcon =
-    "M12 3 2 8v2h20V8L12 3ZM4 12v7H2v2h20v-2h-2v-7h-2v7h-4v-7h-4v7H6v-7H4Z";
+  readonly conducteurIcon =
+    "M12 2C8 2 6 4 6 8s4 6 6 6 6-2 6-6-2-6-6-6Zm0 14c-4 0-8 2-8 4v2h16v-2c0-2-4-4-8-4Z";
   readonly activeIcon =
     "M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17Z";
-  readonly directionIcon =
-    "M4 4h16v16H4V4Zm3 3v3h3V7H7Zm7 0v3h3V7h-3ZM7 14v3h3v-3H7Zm7 0v3h3v-3h-3Z";
-  readonly parcIcon =
-    "M18.92 6.01 17.08 2.33A2 2 0 0 0 15.29 1H8.71a2 2 0 0 0-1.79 1.33L5.08 6.01A3 3 0 0 0 3 8.86V17h2v2h2v-2h10v2h2v-2h2V8.86a3 3 0 0 0-2.08-2.85ZM8.71 3h6.58l1.5 3H7.21l1.5-3ZM7 14a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm10 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4Z";
+  readonly inactiveIcon =
+    "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2Zm0 18c-4.42 0-8-3.58-8-8 0-1.85.63-3.55 1.69-4.9L16.9 18.31A7.902 7.902 0 0 1 12 20Zm6.31-3.1L7.1 5.69A7.902 7.902 0 0 1 12 4c4.42 0 8 3.58 8 8 0 1.85-.63 3.55-1.69 4.9Z";
 
   readonly recherche = new FormControl("", { nonNullable: true });
-  readonly typeFiltre = new FormControl<TypeServiceParc | "">("", {
-    nonNullable: true,
-  });
   readonly statutFiltre = new FormControl<StatutFiltre>("", {
     nonNullable: true,
   });
   readonly formulaire = new FormGroup({
-    code: new FormControl("", {
+    matricule: new FormControl("", {
       nonNullable: true,
       validators: [Validators.required, Validators.maxLength(20)],
     }),
-    libelle: new FormControl("", {
+    nomComplet: new FormControl("", {
       nonNullable: true,
-      validators: [Validators.required, Validators.maxLength(100)],
+      validators: [Validators.required, Validators.maxLength(80)],
     }),
-    type: new FormControl<TypeServiceParc>("DIRECTION", {
+    telephone: new FormControl("", {
+      nonNullable: true,
+      validators: [Validators.maxLength(20)],
+    }),
+    numeroPermis: new FormControl("", {
+      nonNullable: true,
+      validators: [Validators.required, Validators.maxLength(50)],
+    }),
+    dateValiditePermis: new FormControl("", {
       nonNullable: true,
       validators: [Validators.required],
     }),
   });
 
-  page: PageResponse<ServiceParcListe> = this.pageVide();
-  statistiques: ServiceParcStatistiques = {
-    total: 0,
-    actifs: 0,
-    directions: 0,
-    parcsCommuns: 0,
-  };
-  selection: ServiceParcDetail | null = null;
-  cibleStatut: ServiceParcListe | ServiceParcDetail | null = null;
+  page: PageResponse<ConducteurListe> = this.pageVide();
+  statistiques: ConducteurStatistiques = { total: 0, actifs: 0, inactifs: 0 };
+  selection: ConducteurDetail | null = null;
+  cibleStatut: ConducteurListe | ConducteurDetail | null = null;
   chargement = true;
   chargementDetail = false;
   enregistrement = false;
   erreur = "";
   dialogueOuvert = false;
   dialogueMode: DialogMode = "create";
-  serviceModifié: ServiceParcListe | ServiceParcDetail | null = null;
+  conducteurModifié: ConducteurListe | ConducteurDetail | null = null;
 
   ngOnInit(): void {
     this.charger();
     this.recherche.valueChanges
       .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$))
-      .subscribe(() => this.charger(0));
-    this.typeFiltre.valueChanges
-      .pipe(distinctUntilChanged(), takeUntil(this.destroy$))
       .subscribe(() => this.charger(0));
     this.statutFiltre.valueChanges
       .pipe(distinctUntilChanged(), takeUntil(this.destroy$))
@@ -140,7 +134,6 @@ export class ServicesParcsComponent implements OnInit, OnDestroy {
     this.service
       .rechercher(
         this.recherche.value.trim(),
-        this.typeFiltre.value,
         this.statutFiltre.value,
         numeroPage,
       )
@@ -161,18 +154,26 @@ export class ServicesParcsComponent implements OnInit, OnDestroy {
 
   ouvrirCreation(): void {
     this.dialogueMode = "create";
-    this.serviceModifié = null;
-    this.formulaire.reset({ code: "", libelle: "", type: "DIRECTION" });
+    this.conducteurModifié = null;
+    this.formulaire.reset({
+      matricule: "",
+      nomComplet: "",
+      telephone: "",
+      numeroPermis: "",
+      dateValiditePermis: "",
+    });
     this.dialogueOuvert = true;
   }
 
-  ouvrirModification(serviceParc: ServiceParcListe | ServiceParcDetail): void {
+  ouvrirModification(conducteur: ConducteurListe | ConducteurDetail): void {
     this.dialogueMode = "edit";
-    this.serviceModifié = serviceParc;
+    this.conducteurModifié = conducteur;
     this.formulaire.reset({
-      code: serviceParc.code,
-      libelle: serviceParc.libelle,
-      type: serviceParc.type,
+      matricule: conducteur.matricule,
+      nomComplet: conducteur.nomComplet,
+      telephone: conducteur.telephone || "",
+      numeroPermis: conducteur.numeroPermis,
+      dateValiditePermis: conducteur.dateValiditePermis,
     });
     this.dialogueOuvert = true;
   }
@@ -183,25 +184,36 @@ export class ServicesParcsComponent implements OnInit, OnDestroy {
       return;
     }
     const valeur = this.formulaire.getRawValue();
+    const telephone = valeur.telephone?.trim() || null;
     this.enregistrement = true;
     const requête =
       this.dialogueMode === "create"
-        ? this.service.créer(valeur.code, valeur.libelle, valeur.type)
+        ? this.service.créer(
+            valeur.matricule,
+            valeur.nomComplet,
+            telephone,
+            valeur.numeroPermis,
+            valeur.dateValiditePermis,
+          )
         : this.service.modifier(
-            this.serviceModifié!.code,
-            valeur.code,
-            valeur.libelle,
-            valeur.type,
+            this.conducteurModifié!.matricule,
+            valeur.matricule,
+            valeur.nomComplet,
+            telephone,
+            valeur.numeroPermis,
+            valeur.dateValiditePermis,
           );
     requête.subscribe({
       next: (résultat) => {
         this.enregistrement = false;
         this.dialogueOuvert = false;
-        if (this.selection?.code === this.serviceModifié?.code)
+        if (this.selection?.matricule === this.conducteurModifié?.matricule)
           this.selection = résultat;
         this.toast.show(
           "success",
-          this.dialogueMode === "create" ? "Service créé" : "Service modifié",
+          this.dialogueMode === "create"
+            ? "Conducteur créé"
+            : "Conducteur modifié",
         );
         this.charger(this.page.page);
       },
@@ -216,10 +228,10 @@ export class ServicesParcsComponent implements OnInit, OnDestroy {
     });
   }
 
-  consulter(serviceParc: ServiceParcListe): void {
+  consulter(conducteur: ConducteurListe): void {
     this.selection = null;
     this.chargementDetail = true;
-    this.service.consulter(serviceParc.code).subscribe({
+    this.service.consulter(conducteur.matricule).subscribe({
       next: (détail) => {
         this.selection = détail;
         this.chargementDetail = false;
@@ -236,23 +248,24 @@ export class ServicesParcsComponent implements OnInit, OnDestroy {
   }
 
   demanderChangementStatut(
-    serviceParc: ServiceParcListe | ServiceParcDetail,
+    conducteur: ConducteurListe | ConducteurDetail,
   ): void {
-    this.cibleStatut = serviceParc;
+    this.cibleStatut = conducteur;
   }
 
   confirmerChangementStatut(): void {
     if (!this.cibleStatut) return;
     const cible = this.cibleStatut;
     this.enregistrement = true;
-    this.service.changerStatut(cible.code, !cible.actif).subscribe({
+    this.service.changerStatut(cible.matricule, !cible.actif).subscribe({
       next: (résultat) => {
         this.enregistrement = false;
         this.cibleStatut = null;
-        if (this.selection?.code === cible.code) this.selection = résultat;
+        if (this.selection?.matricule === cible.matricule)
+          this.selection = résultat;
         this.toast.show(
           "success",
-          résultat.actif ? "Service activé" : "Service désactivé",
+          résultat.actif ? "Conducteur activé" : "Conducteur désactivé",
         );
         this.charger(this.page.page);
       },
@@ -266,10 +279,6 @@ export class ServicesParcsComponent implements OnInit, OnDestroy {
         );
       },
     });
-  }
-
-  libelleType(type: TypeServiceParc): string {
-    return type === "DIRECTION" ? "Direction" : "Parc commun";
   }
 
   get historique(): ActivityItem[] {
@@ -293,8 +302,8 @@ export class ServicesParcsComponent implements OnInit, OnDestroy {
     }));
   }
 
-  identifier(_index: number, serviceParc: ServiceParcListe): string {
-    return serviceParc.code;
+  identifier(_index: number, conducteur: ConducteurListe): string {
+    return conducteur.matricule;
   }
 
   private messageErreur(erreur: unknown): string {
@@ -310,7 +319,7 @@ export class ServicesParcsComponent implements OnInit, OnDestroy {
     return "Une erreur inattendue est survenue.";
   }
 
-  private pageVide(): PageResponse<ServiceParcListe> {
+  private pageVide(): PageResponse<ConducteurListe> {
     return {
       contenu: [],
       page: 0,
