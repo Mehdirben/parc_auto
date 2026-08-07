@@ -1,6 +1,7 @@
 .app-modal-backdrop { position: fixed; inset: 0; z-index: 800; display: grid; padding: 20px; place-items: center; background: rgba(15,23,42,.5); backdrop-filter: blur(3px); }
 .app-form-modal { width: min(560px, 100%); max-height: calc(100vh - 40px); overflow-y: auto; background: var(--color-surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-xl); }
 .app-form-modal.small { width: min(480px, 100%); }
+.app-form-modal.large { width: min(780px, 100%); }
 .app-form-modal > header { display: flex; padding: 22px 24px; align-items: flex-start; justify-content: space-between; color: var(--color-ink); border-bottom: 1px solid var(--color-border); }
 .app-form-modal > header span { color: var(--color-primary-600); font-size: .61rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
 .app-form-modal > header h2 { margin-top: 4px; font-size: 1.15rem; }
@@ -8,4 +9,4 @@
 .app-form-modal > form { display: grid; padding: 24px; gap: 20px; }
 .app-form-modal > form textarea { min-height: 88px; resize: vertical; }
 .app-form-modal > form footer { display: flex; padding-top: 4px; justify-content: flex-end; gap: 9px; }
-
+.app-form-modal .form-grid > .full-width { grid-column: 1 / -1; }

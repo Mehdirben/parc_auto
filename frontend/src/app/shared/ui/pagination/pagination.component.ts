@@ -1,12 +1,11 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
-  selector: 'app-pagination',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './pagination.component.html',
-  styleUrls: ['./pagination.component.css']
+    selector: 'app-pagination',
+    imports: [],
+    templateUrl: './pagination.component.html',
+    styleUrls: ['./pagination.component.css']
 })
 export class PaginationComponent {
   @Input() page = 0;
@@ -15,6 +14,7 @@ export class PaginationComponent {
   @Input() totalPages = 0;
   @Input() first = true;
   @Input() last = true;
+  @Input() disabled = false;
   @Output() pageChange = new EventEmitter<number>();
 
   get start(): number { return this.totalItems === 0 ? 0 : this.page * this.pageSize + 1; }

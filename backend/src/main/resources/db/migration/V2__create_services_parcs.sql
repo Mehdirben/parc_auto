@@ -1,9 +1,7 @@
 CREATE TABLE services_parcs (
     id UNIQUEIDENTIFIER NOT NULL,
     code VARCHAR(20) NOT NULL,
-    code_normalise VARCHAR(20) NOT NULL,
     libelle NVARCHAR(100) NOT NULL,
-    libelle_normalise NVARCHAR(100) NOT NULL,
     type VARCHAR(20) NOT NULL,
     actif BIT NOT NULL CONSTRAINT df_services_parcs_actif DEFAULT 1,
     date_creation DATETIME2 NOT NULL,
@@ -11,21 +9,32 @@ CREATE TABLE services_parcs (
     date_modification DATETIME2 NULL,
     modifie_par NVARCHAR(100) NULL,
     CONSTRAINT pk_services_parcs PRIMARY KEY (id),
-    CONSTRAINT uk_services_parcs_code_normalise UNIQUE (code_normalise),
-    CONSTRAINT uk_services_parcs_libelle_normalise UNIQUE (libelle_normalise),
+    CONSTRAINT uk_services_parcs_code UNIQUE (code),
+    CONSTRAINT uk_services_parcs_libelle UNIQUE (libelle),
     CONSTRAINT ck_services_parcs_type CHECK (type IN ('DIRECTION', 'PARC_COMMUN'))
 );
 
-CREATE TABLE services_parcs_evenements (
+CREATE TABLE journalaudit (
     id UNIQUEIDENTIFIER NOT NULL,
-    service_parc_id UNIQUEIDENTIFIER NOT NULL,
-    action VARCHAR(20) NOT NULL,
-    date_evenement DATETIME2 NOT NULL,
-    utilisateur NVARCHAR(100) NOT NULL,
-    CONSTRAINT pk_services_parcs_evenements PRIMARY KEY (id),
-    CONSTRAINT fk_services_parcs_evenements_service FOREIGN KEY (service_parc_id) REFERENCES services_parcs(id),
-    CONSTRAINT ck_services_parcs_evenements_action CHECK (action IN ('CREATION', 'MODIFICATION', 'ACTIVATION', 'DESACTIVATION'))
+    utilisateur NVARCHAR(100) NULL,
+    date_action DATETIME2 NOT NULL,
+    action VARCHAR(30) NOT NULL,
+    entite VARCHAR(50) NOT NULL,
+    entite_id VARCHAR(100) NOT NULL,
+    anciennes_valeurs NVARCHAR(MAX) NULL,
+    nouvelles_valeurs NVARCHAR(MAX) NULL,
+    adresse_ip VARCHAR(45) NOT NULL,
+    resultat VARCHAR(10) NOT NULL,
+    CONSTRAINT pk_journalaudit PRIMARY KEY (id),
+    CONSTRAINT ck_journalaudit_anciennes_valeurs_json
+        CHECK (anciennes_valeurs IS NULL OR ISJSON(anciennes_valeurs) = 1),
+    CONSTRAINT ck_journalaudit_nouvelles_valeurs_json
+        CHECK (nouvelles_valeurs IS NULL OR ISJSON(nouvelles_valeurs) = 1),
+    CONSTRAINT ck_journalaudit_resultat CHECK (resultat IN ('SUCCES', 'ECHEC'))
 );
 
 CREATE INDEX ix_services_parcs_type_actif ON services_parcs(type, actif);
-CREATE INDEX ix_services_parcs_evenements_service_date ON services_parcs_evenements(service_parc_id, date_evenement DESC);
+CREATE INDEX ix_journalaudit_entite_cible_date
+    ON journalaudit(entite, entite_id, date_action DESC);
+CREATE INDEX ix_journalaudit_utilisateur_date
+    ON journalaudit(utilisateur, date_action DESC);

@@ -1,0 +1,49 @@
+<app-form-modal
+  [open]="open"
+  [eyebrow]="mode === 'create' ? 'Ajout multiple possible' : 'Modification'"
+  [title]="mode === 'create' ? 'Ajouter des modèles' : 'Modifier le modèle'"
+  size="small"
+  (closed)="closed.emit()">
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    @if (mode === 'create' && !lockMarque) {
+      <app-form-field
+        label="Marque"
+        controlId="modeleMarque"
+        [required]="true"
+        [error]="form.controls.marqueCode.touched && form.controls.marqueCode.invalid ? 'Sélectionnez une marque.' : ''">
+        <select class="form-control" id="modeleMarque" [formControl]="form.controls.marqueCode">
+          <option value="" disabled>Sélectionner une marque</option>
+          @for (marque of marques; track marque) {
+            <option [value]="marque.code">{{ marque.designation }} ({{ marque.code }})</option>
+          }
+        </select>
+      </app-form-field>
+    }
+
+    @if (mode === 'create') {
+      <app-dynamic-text-list
+        [control]="form.controls.noms"
+        title="Modèles"
+        singularLabel="Modèle"
+        firstPlaceholder="Ex. Clio"
+        nextPlaceholder="Autre modèle"
+        requiredMessage="Saisissez au moins un modèle.">
+      </app-dynamic-text-list>
+    }
+
+    @if (mode === 'edit') {
+      <app-form-field
+        label="Nom du modèle"
+        controlId="nomModele"
+        [required]="true"
+        [error]="form.controls.nom.touched && form.controls.nom.invalid ? 'Le nom est obligatoire (80 caractères maximum).' : ''">
+        <input class="form-control" id="nomModele" [formControl]="form.controls.nom" maxlength="80" placeholder="Ex. Clio">
+      </app-form-field>
+    }
+
+    <footer>
+      <button class="btn btn-secondary" type="button" (click)="closed.emit()">Annuler</button>
+      <button class="btn btn-primary" type="submit" [disabled]="saving">Enregistrer</button>
+    </footer>
+  </form>
+</app-form-modal>

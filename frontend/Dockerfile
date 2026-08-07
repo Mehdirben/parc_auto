@@ -2,9 +2,9 @@
 FROM node:20-alpine AS build
 WORKDIR /app
 
-# Copy package configurations and install dependencies
+# Install exactly the dependency graph recorded in package-lock.json.
 COPY package*.json ./
-RUN npm install
+RUN npm ci
 
 # Copy the rest of the source code and build the application
 COPY . .

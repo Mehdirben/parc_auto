@@ -1,18 +1,30 @@
-<aside class="sidebar" [class.mobile-open]="open" [class.collapsed]="collapsed" aria-label="Navigation principale">
+<aside id="main-sidebar" class="sidebar" [class.mobile-open]="open" [class.collapsed]="collapsed" aria-label="Navigation principale">
   <div class="sidebar-brand">
     <div class="brand-emblem" aria-hidden="true">
       <svg viewBox="0 0 48 48" width="36" height="36"><path d="M24 4 42 14v20L24 44 6 34V14L24 4Z" fill="none" stroke="currentColor" stroke-width="2"/><path d="m24 12 3.3 7.7 8.3.7-6.3 5.5 1.9 8.1-7.2-4.2-7.2 4.2 1.9-8.1-6.3-5.5 8.3-.7L24 12Z" fill="currentColor"/></svg>
     </div>
-    <div class="brand-copy"><strong>PARC MESRSI</strong><span>Gestion automobile</span></div>
+    <div class="brand-copy"><strong>PARC AUTOMOBILE</strong><span>Gestion de flotte</span></div>
     <button class="sidebar-close" type="button" aria-label="Fermer le menu" (click)="closed.emit()">×</button>
   </div>
   <nav class="sidebar-nav">
     <span class="nav-section">Navigation</span>
-    <a class="nav-link" *ngFor="let item of items" [routerLink]="item.route" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }" [attr.title]="collapsed ? item.label : null">
-      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" [attr.d]="item.icon"/></svg><span>{{ item.label }}</span>
-    </a>
+    @for (item of items; track item) {
+      <a class="nav-link" [routerLink]="item.route" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }" [attr.title]="collapsed ? item.label : null">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" [attr.d]="item.icon"/></svg><span>{{ item.label }}</span>
+      </a>
+    }
   </nav>
   <div class="sidebar-footer">
+    <app-sidebar-account
+      [authenticated]="authenticated"
+      [initials]="userInitials"
+      [fullName]="userFullName"
+      [role]="userRole"
+      [collapsed]="collapsed && !open"
+      (accountOpened)="accountOpened.emit()"
+      (loggedIn)="loggedIn.emit()"
+      (loggedOut)="loggedOut.emit()">
+    </app-sidebar-account>
     <button class="collapse-button" type="button" (click)="collapsedChange.emit(!collapsed)" [attr.aria-label]="collapsed ? 'Agrandir le menu' : 'Réduire le menu'">
       <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><path fill="currentColor" d="m15.4 16.6-4.6-4.6 4.6-4.6L14 6l-6 6 6 6 1.4-1.4Z"/></svg><span>Réduire le menu</span>
     </button>

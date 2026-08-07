@@ -1,0 +1,89 @@
+<app-form-modal
+  [open]="open" size="large" eyebrow="Situation du parc"
+  title="Importer un fichier SIT.xlsx" (closed)="fermer()">
+  <div class="import-content">
+    <section class="template-download">
+      <div>
+        <strong>Besoin d’un fichier de départ ?</strong>
+        <span>Téléchargez le modèle vide avec les colonnes attendues.</span>
+      </div>
+      <button class="btn btn-secondary" type="button"
+        [disabled]="telechargementModele" (click)="telechargerModele()">
+        <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true">
+          <path fill="currentColor" d="M11 3h2v10.17l3.59-3.58L18 11l-6 6-6-6 1.41-1.41L11 13.17V3Zm-6 16h14v2H5v-2Z"/>
+        </svg>
+        {{ telechargementModele ? 'Téléchargement…' : 'Télécharger le modèle SIT.xlsx' }}
+      </button>
+    </section>
+
+    <label class="file-zone" for="sitFile">
+      <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">
+        <path fill="currentColor" d="M19 9h-4V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V11l-2-2Zm-6-4.5L19.5 11H13V4.5ZM11 13v3H9l3 3 3-3h-2v-3h-2Z"/>
+      </svg>
+      <strong>{{ fichier?.name || 'Sélectionner le fichier Excel' }}</strong>
+      <span>Format .xlsx · 10 Mo maximum</span>
+      <input id="sitFile" type="file" accept=".xlsx" (change)="selectionner($event)">
+    </label>
+
+    @if (chargement) {
+      <div class="import-loading">
+        <span></span> Analyse du fichier en cours…
+      </div>
+    }
+
+    @if ((resultat || apercu); as synthese) {
+      <section class="import-summary" [class.completed]="!!resultat">
+        <article><strong>{{ synthese.nombreCreations }}</strong><span>Créations</span></article>
+        <article><strong>{{ synthese.nombreMisesAJour }}</strong><span>Mises à jour</span></article>
+        <article><strong>{{ synthese.nombreLignesIgnorees }}</strong><span>Lignes ignorées</span></article>
+      </section>
+      @if (!resultat) {
+        <p class="validation-note">
+          Vérifiez l’aperçu avant de confirmer. Les lignes ignorées ne modifieront aucune donnée.
+        </p>
+      }
+      @if (resultat) {
+        <p class="validation-note success">
+          Import terminé et historisé dans le journal d’activité.
+        </p>
+      }
+      <div class="preview-table">
+        <table class="data-table">
+          <thead><tr><th>Ligne</th><th>Immatriculation</th><th>Marque / Type</th><th>VIN</th><th>Résultat</th></tr></thead>
+          <tbody>
+            @for (ligne of synthese.lignes | slice:0:100; track ligne) {
+              <tr>
+                <td>{{ ligne.ligne }}</td>
+                <td>{{ ligne.immatriculation || '—' }}</td>
+                <td>{{ ligne.marque || '—' }}<small>{{ ligne.type || 'Type non renseigné' }}</small></td>
+                <td>{{ ligne.vin || '—' }}</td>
+                <td>
+                  <span class="import-status" [class.create]="ligne.action === 'CREATION'"
+                    [class.update]="ligne.action === 'MISE_A_JOUR'"
+                  [class.ignore]="ligne.action === 'IGNOREE'">{{ libelleAction(ligne.action) }}</span>
+                  <small>{{ ligne.message }}</small>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      @if (synthese.lignes.length > 100) {
+        <p class="preview-limit">
+          Les 100 premières lignes sont affichées sur {{ synthese.lignes.length }}.
+        </p>
+      }
+    }
+
+    <footer>
+      <button class="btn btn-secondary" type="button" (click)="fermer()">
+        {{ resultat ? 'Fermer' : 'Annuler' }}
+      </button>
+      @if (apercu && !resultat) {
+        <button class="btn btn-primary" type="button"
+          [disabled]="chargement || apercu.nombreCreations + apercu.nombreMisesAJour === 0"
+        (click)="confirmer()">Valider l’import</button>
+      }
+    </footer>
+  </div>
+</app-form-modal>

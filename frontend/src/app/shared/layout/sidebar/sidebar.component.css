@@ -2,24 +2,30 @@
 .sidebar { position: sticky; top: 0; z-index: 300; display: flex; height: 100vh; min-width: 0; flex-direction: column; overflow: hidden; color: #dbe7e4; background: linear-gradient(180deg, #0c3b35 0%, #082d29 100%); border-right: 1px solid rgba(255,255,255,.08); }
 .sidebar-brand { display: flex; min-height: 82px; padding: 17px 20px; align-items: center; gap: 12px; border-bottom: 1px solid rgba(255,255,255,.09); }
 .brand-emblem { display: grid; width: 43px; height: 43px; flex: 0 0 43px; place-items: center; color: #d6b85a; }
-.brand-copy { display: flex; min-width: 0; flex-direction: column; white-space: nowrap; }
+.brand-copy { display: flex; min-width: 0; max-width: 190px; flex-direction: column; overflow: hidden; white-space: nowrap; opacity: 1; transform: translateX(0); transition: max-width .28s cubic-bezier(.4, 0, .2, 1), opacity .16s ease .08s, transform .22s ease .05s; }
 .brand-copy strong { color: #fff; font-size: .96rem; letter-spacing: .08em; }
 .brand-copy span { margin-top: 2px; color: #c1d2ce; font-size: .69rem; }
 .sidebar-close { display: none; margin-left: auto; color: #fff; font-size: 1.6rem; background: none; border: 0; cursor: pointer; }
 .sidebar-nav { display: flex; padding: 20px 13px; flex: 1; flex-direction: column; gap: 4px; overflow-y: auto; }
-.nav-section { padding: 0 12px 9px; color: #86a8a0; font-size: .63rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
-.nav-link { position: relative; display: flex; min-height: 45px; padding: 11px 12px; align-items: center; gap: 13px; color: #c5d7d3; font-size: .82rem; font-weight: 550; text-decoration: none; border-radius: 9px; transition: color .16s ease, background .16s ease; }
-.nav-link svg { flex: 0 0 20px; }.nav-link span { overflow: hidden; white-space: nowrap; }.nav-link:hover { color: #fff; background: rgba(255,255,255,.07); }.nav-link.active { color: #fff; background: rgba(213,184,90,.16); }.nav-link.active svg { color: #d6b85a; }
-.sidebar-footer { padding: 13px; border-top: 1px solid rgba(255,255,255,.08); }
-.collapse-button { display: flex; width: 100%; padding: 9px 11px; align-items: center; gap: 12px; color: #91aaa5; font-size: .72rem; background: none; border: 0; border-radius: 8px; cursor: pointer; }.collapse-button:hover { color: #fff; background: rgba(255,255,255,.05); }
-.sidebar.collapsed .brand-copy, .sidebar.collapsed .nav-section, .sidebar.collapsed .nav-link span, .sidebar.collapsed .collapse-button span { display: none; }
-.sidebar.collapsed .sidebar-brand { justify-content: center; padding-inline: 12px; }.sidebar.collapsed .nav-link { justify-content: center; padding-inline: 10px; }.sidebar.collapsed .collapse-button { justify-content: center; transform: rotate(180deg); }
+.nav-section { max-height: 26px; padding: 0 12px 9px; overflow: hidden; color: #86a8a0; font-size: .63rem; font-weight: 800; letter-spacing: .13em; white-space: nowrap; text-transform: uppercase; opacity: 1; transform: translateX(0); transition: max-height .24s ease, padding .24s ease, opacity .14s ease .06s, transform .2s ease .04s; }
+.nav-link { position: relative; display: flex; min-height: 45px; padding: 11px 12px; align-items: center; gap: 13px; color: #c5d7d3; font-size: .82rem; font-weight: 550; text-decoration: none; border-radius: 9px; transition: padding .28s cubic-bezier(.4, 0, .2, 1), gap .28s cubic-bezier(.4, 0, .2, 1), color .16s ease, background .16s ease; }
+.nav-link svg { flex: 0 0 20px; transition: transform .28s cubic-bezier(.4, 0, .2, 1); }.nav-link span { overflow: hidden; max-width: 180px; white-space: nowrap; opacity: 1; transform: translateX(0); transition: max-width .28s cubic-bezier(.4, 0, .2, 1), opacity .14s ease .07s, transform .2s ease .04s; }.nav-link:hover { color: #fff; background: rgba(255,255,255,.07); }.nav-link.active { color: #fff; background: rgba(213,184,90,.16); }.nav-link.active svg { color: #d6b85a; }
+.sidebar-footer { display: flex; padding: 13px; flex-direction: column; gap: 10px; border-top: 1px solid rgba(255,255,255,.08); }
+.collapse-button { display: flex; width: 100%; padding: 9px 11px; align-items: center; gap: 12px; color: #91aaa5; font-size: .72rem; background: none; border: 0; border-radius: 8px; cursor: pointer; transition: padding .28s cubic-bezier(.4, 0, .2, 1), gap .28s cubic-bezier(.4, 0, .2, 1), color .16s ease, background .16s ease; }.collapse-button:hover { color: #fff; background: rgba(255,255,255,.05); }.collapse-button svg { flex: 0 0 19px; transition: transform .28s cubic-bezier(.4, 0, .2, 1); }.collapse-button span { overflow: hidden; max-width: 150px; white-space: nowrap; opacity: 1; transform: translateX(0); transition: max-width .28s cubic-bezier(.4, 0, .2, 1), opacity .14s ease .07s, transform .2s ease .04s; }
+.sidebar.collapsed .brand-copy, .sidebar.collapsed .nav-link span, .sidebar.collapsed .collapse-button span { max-width: 0; opacity: 0; transform: translateX(-8px); transition-delay: 0s; }
+.sidebar.collapsed .nav-section { max-height: 0; padding-block: 0; opacity: 0; transform: translateX(-8px); transition-delay: 0s; }
+.sidebar.collapsed .nav-link { padding-inline: 18px; gap: 0; }.sidebar.collapsed .collapse-button { padding-inline: 18px; gap: 0; }.sidebar.collapsed .collapse-button svg { transform: rotate(180deg); }
 @media (max-width: 1024px) {
   :host { position: fixed; left: 0; z-index: 300; width: 280px; transform: translateX(-101%); transition: transform .22s ease; box-shadow: 16px 0 40px rgba(7,35,31,.2); }
   :host(.mobile-open) { transform: translateX(0); }
   .sidebar { position: static; width: 280px; }
   .sidebar-close { display: block; }
-  .sidebar.collapsed .brand-copy, .sidebar.collapsed .nav-section, .sidebar.collapsed .nav-link span, .sidebar.collapsed .collapse-button span { display: initial; }
-  .sidebar.collapsed .sidebar-brand, .sidebar.collapsed .nav-link, .sidebar.collapsed .collapse-button { justify-content: initial; }
-  .sidebar.collapsed .collapse-button { transform: none; }.collapse-button { display: none; }
+  .sidebar.collapsed .brand-copy, .sidebar.collapsed .nav-link span { max-width: 190px; opacity: 1; transform: none; }
+  .sidebar.collapsed .nav-section { max-height: 26px; padding-block: 0 9px; opacity: 1; transform: none; }
+  .sidebar.collapsed .nav-link { padding-inline: 12px; gap: 13px; }
+  .collapse-button { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host, .brand-copy, .nav-section, .nav-link, .nav-link svg, .nav-link span, .collapse-button, .collapse-button svg, .collapse-button span { transition: none; }
 }

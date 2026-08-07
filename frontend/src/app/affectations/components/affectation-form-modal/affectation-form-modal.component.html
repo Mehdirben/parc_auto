@@ -1,0 +1,68 @@
+<app-form-modal
+  [open]="open" size="large" eyebrow="Mouvement de véhicule"
+  [title]="affectation ? 'Changer l’affectation' : 'Nouvelle affectation'"
+  (closed)="closed.emit()">
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <div class="form-grid">
+      <app-form-field class="full-width" label="Véhicule" controlId="affVehicule" [required]="true">
+        <select class="form-control" id="affVehicule" formControlName="vehiculeId" [attr.disabled]="affectation ? true : null">
+          <option value="">Sélectionnez un véhicule</option>
+          @for (item of options.vehicules; track item) {
+            <option [value]="item.id">
+              {{ item.immatriculation }} · {{ item.marqueModele }}
+            </option>
+          }
+        </select>
+      </app-form-field>
+      <app-form-field label="Service / parc" controlId="affService" [required]="true">
+        <select class="form-control" id="affService" formControlName="serviceParcId">
+          <option value="">Sélectionnez</option>
+          @for (item of options.servicesParcs; track item) {
+            <option [value]="item.id">{{ item.code }} · {{ item.libelle }}</option>
+          }
+        </select>
+      </app-form-field>
+      <app-form-field label="Conducteur" controlId="affConducteur" [required]="true">
+        <select class="form-control" id="affConducteur" formControlName="conducteurId">
+          <option value="">Sélectionnez</option>
+          @for (item of options.conducteurs; track item) {
+            <option [value]="item.id">{{ item.matricule }} · {{ item.nomComplet }}</option>
+          }
+        </select>
+      </app-form-field>
+      <app-form-field label="Date d’effet" controlId="affDate" [required]="true">
+        <input class="form-control" id="affDate" type="date" formControlName="dateDebut" [max]="today">
+      </app-form-field>
+      @if (missionActive) {
+        <section class="mission-fields full-width">
+          <p>Parc de mission avec conducteur désigné — informations de l’ordre de mission (تكليف بمهمة)</p>
+          <div class="form-grid">
+            <app-form-field label="Date de fin" controlId="affDateFin" [required]="true"
+              [error]="form.controls.dateFinPrevue.touched && form.controls.dateFinPrevue.invalid ? 'La date de fin est obligatoire.' : ''">
+              <input class="form-control" id="affDateFin" type="date"
+                formControlName="dateFinPrevue" [min]="form.controls.dateDebut.value">
+            </app-form-field>
+            <app-form-field label="Type de mission" controlId="affTypeMission" [required]="true"
+              [error]="form.controls.typeMission.touched && form.controls.typeMission.invalid ? 'Le type de mission est obligatoire.' : ''">
+              <input class="form-control" id="affTypeMission" formControlName="typeMission"
+                maxlength="200" placeholder="Ex. Mission urbaine, déplacement Rabat–Casablanca…">
+            </app-form-field>
+          </div>
+        </section>
+      }
+      <app-form-field class="full-width" label="Motif" controlId="affMotif" [required]="true"
+        [error]="form.controls.motif.touched && form.controls.motif.invalid ? 'Le motif est obligatoire (500 caractères maximum).' : ''">
+        <textarea class="form-control" id="affMotif" formControlName="motif" maxlength="500" rows="3"></textarea>
+      </app-form-field>
+    </div>
+    @if (affectation) {
+      <p class="movement-note">L’affectation actuelle sera clôturée automatiquement à cette date.</p>
+    }
+    <footer>
+      <button class="btn btn-secondary" type="button" (click)="closed.emit()">Annuler</button>
+      <button class="btn btn-primary" type="submit" [disabled]="saving">
+        {{ affectation ? 'Confirmer le changement' : 'Créer l’affectation' }}
+      </button>
+    </footer>
+  </form>
+</app-form-modal>

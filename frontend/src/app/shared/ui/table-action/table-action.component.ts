@@ -4,7 +4,6 @@ export type TableActionKind = 'view' | 'edit' | 'delete' | 'status';
 
 @Component({
   selector: 'app-table-action',
-  standalone: true,
   templateUrl: './table-action.component.html',
   styleUrls: ['./table-action.component.css']
 })

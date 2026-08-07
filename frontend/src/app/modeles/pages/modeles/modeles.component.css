@@ -1,0 +1,2 @@
+.model-link { color: var(--color-ink); font-size: .78rem; font-weight: 750; text-align: left; background: none; border: 0; cursor: pointer; }
+.model-link:hover { color: var(--color-primary-600); text-decoration: underline; }

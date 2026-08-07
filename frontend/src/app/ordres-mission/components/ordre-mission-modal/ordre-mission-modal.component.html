@@ -1,0 +1,25 @@
+@if (ordre) {
+  <div class="mission-backdrop" (click)="closed.emit()">
+    <section class="mission-modal" role="dialog" aria-modal="true"
+      aria-label="Aperçu de l’ordre de mission" (click)="$event.stopPropagation()">
+      <header>
+        <div><span>Document bilingue</span><h2>Ordre de mission</h2><small>{{ ordre.numero }}</small></div>
+        <button type="button" aria-label="Fermer" (click)="closed.emit()">×</button>
+      </header>
+      <div class="mission-preview">
+        <app-pdf-preview [pdfBlob]="documentBlob" [filename]="filename"
+          [loading]="loading" [externalError]="documentError"
+          ariaLabel="Aperçu de l’ordre de mission"
+          (renderError)="signalerErreurApercu($event)"></app-pdf-preview>
+      </div>
+      <footer>
+        <p>Gabarit provisoire — le modèle officiel pourra être substitué sans modifier les données.</p>
+        <div>
+          <button class="btn btn-secondary" type="button" (click)="closed.emit()">Fermer</button>
+          <button class="btn btn-secondary" type="button" [disabled]="!documentBlob" (click)="telecharger()">Télécharger</button>
+          <button class="btn btn-primary" type="button" [disabled]="!documentBlob" (click)="imprimer()">Imprimer</button>
+        </div>
+      </footer>
+    </section>
+  </div>
+}

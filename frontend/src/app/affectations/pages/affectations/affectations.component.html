@@ -1,0 +1,156 @@
+<app-page-header eyebrow="Parc automobile" title="Affectations"
+  description="Suivez les véhicules affectés, leurs changements et leurs restitutions au parc.">
+  @if (permissions.peutModifier) {
+    <button class="btn btn-primary" type="button" (click)="ouvrirCreation()">
+      <svg viewBox="0 0 24 24" width="17" height="17"><path fill="currentColor" d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5Z"/></svg>
+      Nouvelle affectation
+    </button>
+  }
+</app-page-header>
+
+<section class="summary-grid assignment-summary">
+  <app-summary-card [value]="totalActives" label="Affectations actives" [icon]="affectationIcon"></app-summary-card>
+  <app-summary-card [value]="options.vehicules.length" label="Véhicules affectables" [icon]="vehiculeIcon"></app-summary-card>
+  <app-summary-card [value]="options.conducteurs.length" label="Conducteurs actifs" [icon]="conducteurIcon" tone="gold"></app-summary-card>
+  <app-summary-card [value]="options.servicesParcs.length" label="Services actifs" [icon]="serviceIcon" tone="gold"></app-summary-card>
+</section>
+
+<section class="panel list-panel" [attr.aria-busy]="chargement">
+  <app-search-toolbar [control]="recherche"
+    placeholder="Rechercher par véhicule, service ou conducteur…"
+    ariaLabel="Rechercher une affectation" (refreshed)="charger()">
+    <select class="filter-select" [formControl]="statutFiltre" aria-label="Afficher les affectations">
+      <option value="ACTIVE">Affectations actives</option>
+      <option value="">Historique complet</option>
+    </select>
+    <select class="filter-select" [formControl]="ordreMissionFiltre"
+      aria-label="Filtrer par ordre de mission">
+      <option value="">Mission : toutes</option>
+      <option value="ELIGIBLE">Affectations éligibles</option>
+      <option value="GENERE">Ordres déjà générés</option>
+      <option value="A_GENERER">Ordres à générer</option>
+    </select>
+  </app-search-toolbar>
+
+  @if (page.contenu.length) {
+    <app-data-table>
+      <table class="data-table">
+        <thead><tr><th>Véhicule</th><th>Service / parc</th><th>Conducteur</th><th>Début</th><th>Fin</th><th>Statut</th><th class="actions-column">Actions</th></tr></thead>
+        <tbody>
+          @for (item of page.contenu; track identifier($index, item)) {
+            <tr>
+              <td><strong class="vehicle-registration">{{ item.immatriculation }}</strong><small class="secondary-line">{{ item.marqueModele }}</small></td>
+              <td><strong>{{ item.serviceParcLibelle }}</strong><small class="secondary-line">{{ item.serviceParcCode }}</small></td>
+              <td>{{ item.conducteurNom }}<small class="secondary-line">{{ item.conducteurMatricule }}</small></td>
+              <td>{{ item.dateDebut | date:'dd/MM/yyyy' }}</td>
+              <td>{{ item.dateFin ? (item.dateFin | date:'dd/MM/yyyy') : '—' }}</td>
+              <td><span class="status-badge" [class.success]="item.statut === 'ACTIVE'" [class.neutral]="item.statut === 'TERMINEE'">{{ item.statut === 'ACTIVE' ? 'Active' : 'Terminée' }}</span></td>
+              <td class="actions-cell">
+                @if (permissions.peutModifier && item.ordreMissionDisponible) {
+                  <button class="mission-action"
+                  type="button" (click)="ouvrirOrdreMission(item)">Ordre de mission</button>
+                }
+                <app-table-action kind="view" (triggered)="consulter(item)"></app-table-action>
+                @if (item.statut === 'ACTIVE') {
+                  @if (permissions.peutModifier) {
+                    <app-table-action kind="edit" label="Changer l’affectation" (triggered)="ouvrirChangement(item)"></app-table-action>
+                  }
+                  @if (permissions.peutModifier) {
+                    <app-table-action kind="status" label="Restituer au parc" (triggered)="cibleRestitution = item"></app-table-action>
+                  }
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </app-data-table>
+  }
+  @if (chargement && !page.contenu.length) {
+    <app-table-loading></app-table-loading>
+  }
+  @if (!chargement && !page.contenu.length && !erreur) {
+    <app-empty-state
+      [title]="statutFiltre.value === 'ACTIVE' ? 'Aucune affectation active' : 'Aucun historique'"
+      [description]="recherche.value || ordreMissionFiltre.value ? 'Aucun résultat ne correspond aux filtres sélectionnés.' : 'Aucun mouvement n’a encore été enregistré.'">
+      @if (permissions.peutModifier && statutFiltre.value === 'ACTIVE' && !recherche.value) {
+        <button class="btn btn-primary" type="button" (click)="ouvrirCreation()">Nouvelle affectation</button>
+      }
+    </app-empty-state>
+  }
+  @if (!chargement && erreur) {
+    <app-empty-state title="Chargement impossible" [description]="erreur">
+      <button class="btn btn-secondary" type="button" (click)="charger()">Réessayer</button>
+    </app-empty-state>
+  }
+  @if (page.contenu.length) {
+    <app-pagination [page]="page.page" [pageSize]="page.taille"
+      [totalItems]="page.totalElements" [totalPages]="page.totalPages"
+      [first]="page.premiere" [last]="page.derniere" [disabled]="chargement" (pageChange)="charger($event)">
+    </app-pagination>
+  }
+</section>
+
+<app-detail-modal [open]="chargementDetail || !!selection" [loading]="chargementDetail"
+  loadingText="Chargement de l’affectation…" eyebrow="Fiche affectation"
+  [title]="selection?.affectation?.immatriculation || ''"
+  [code]="selection?.affectation?.vehiculeCode || ''"
+  ariaLabel="Détail de l’affectation" (closed)="selection = null">
+  @if (selection; as detail) {
+    <dl class="identity-grid">
+      <div><dt>Véhicule</dt><dd>{{ detail.affectation.marqueModele }}</dd></div>
+      <div><dt>Statut</dt><dd><span class="status-badge" [class.success]="detail.affectation.statut === 'ACTIVE'" [class.neutral]="detail.affectation.statut === 'TERMINEE'">{{ detail.affectation.statut === 'ACTIVE' ? 'Active' : 'Terminée' }}</span></dd></div>
+      <div><dt>Service / parc</dt><dd>{{ detail.affectation.serviceParcLibelle }}</dd></div>
+      <div><dt>Conducteur</dt><dd>{{ detail.affectation.conducteurNom }}</dd></div>
+      <div><dt>Date de début</dt><dd>{{ detail.affectation.dateDebut | date:'dd/MM/yyyy' }}</dd></div>
+      <div><dt>Date de fin</dt><dd>{{ detail.affectation.dateFin ? (detail.affectation.dateFin | date:'dd/MM/yyyy') : 'En cours' }}</dd></div>
+      @if (detail.affectation.dateFinPrevue) {
+        <div><dt>Retour prévu</dt><dd>{{ detail.affectation.dateFinPrevue | date:'dd/MM/yyyy' }}</dd></div>
+      }
+      @if (detail.affectation.typeMission) {
+        <div><dt>Type de mission</dt><dd>{{ detail.affectation.typeMission }}</dd></div>
+      }
+      <div class="wide"><dt>Motif</dt><dd>{{ detail.affectation.motif }}</dd></div>
+    </dl>
+    <section class="detail-section">
+      <h3>Historique complet du véhicule</h3>
+      @if (detail.historiqueVehicule.length) {
+        <div class="record-list">
+          @for (item of detail.historiqueVehicule; track item) {
+            <article>
+              <div class="record-heading">
+                <strong>{{ item.serviceParcLibelle }}</strong>
+                @if (permissions.peutModifier && item.ordreMissionDisponible) {
+                  <button class="btn btn-secondary btn-compact mission-history-action"
+                    type="button" (click)="ouvrirOrdreMission(item)">
+                    <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
+                      <path fill="currentColor" d="M6 2h8l4 4v16H6V2Zm7 2v4h3.6L13 4ZM8 11v2h8v-2H8Zm0 4v2h8v-2H8Z"/>
+                    </svg>
+                    <span>Consulter l’ordre de mission</span>
+                  </button>
+                }
+              </div>
+              <span>{{ item.conducteurNom }}</span>
+              <small>{{ item.dateDebut | date:'dd/MM/yyyy' }} — {{ item.dateFin ? (item.dateFin | date:'dd/MM/yyyy') : 'en cours' }} · {{ item.motif }}</small>
+            </article>
+          }
+        </div>
+      }
+    </section>
+    <app-audit-trail [createdAt]="detail.affectation.dateCreation" [createdBy]="detail.affectation.creePar"></app-audit-trail>
+    <app-activity-timeline [items]="timeline"></app-activity-timeline>
+  }
+</app-detail-modal>
+
+<app-affectation-form-modal [open]="creationOuverte" [options]="options"
+  [affectation]="cibleChangement" [saving]="enregistrement"
+  (closed)="creationOuverte = false; cibleChangement = null"
+  (submitted)="enregistrer($event)">
+</app-affectation-form-modal>
+
+<app-restitution-modal [affectation]="cibleRestitution" [saving]="enregistrement"
+  (closed)="cibleRestitution = null" (submitted)="restituer($event)">
+</app-restitution-modal>
+
+<app-ordre-mission-modal [ordre]="ordreMission"
+(closed)="ordreMission = null"></app-ordre-mission-modal>

@@ -5,6 +5,8 @@
     </svg>
   </div>
   <h2>{{ title }}</h2>
-  <p *ngIf="description">{{ description }}</p>
+  @if (description) {
+    <p>{{ description }}</p>
+  }
   <div class="empty-action"><ng-content></ng-content></div>
 </section>

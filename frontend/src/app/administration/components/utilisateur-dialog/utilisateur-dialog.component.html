@@ -1,0 +1,95 @@
+@if (open) {
+  <div class="modal-backdrop" (click)="closed.emit()">
+    <article class="user-dialog" (click)="$event.stopPropagation()">
+      <header>
+        <div>
+          <small>{{ estProfil ? 'Mon compte Keycloak' : 'Compte Keycloak' }}</small>
+          <h2>{{ titre }}</h2>
+        </div>
+        <button type="button" aria-label="Fermer" (click)="closed.emit()">×</button>
+      </header>
+      @if (erreur || erreurValidation) {
+        <p class="dialog-alert">
+          {{ erreur || erreurValidation }}
+        </p>
+      }
+      <form (ngSubmit)="enregistrer()">
+        <div class="form-grid">
+          <div class="form-field">
+            <label for="dialog-username">Identifiant <span class="required">*</span></label>
+            <input id="dialog-username" class="form-control" name="username" required
+              maxlength="100" [readOnly]="!estCreation" [(ngModel)]="formulaire.nomUtilisateur">
+            @if (!estCreation) {
+              <small>L’identifiant est conservé après la création.</small>
+            }
+          </div>
+          <div class="form-field">
+            <label for="dialog-email">E-mail <span class="required">*</span></label>
+            <input id="dialog-email" class="form-control" name="email" type="email"
+              required maxlength="180" [(ngModel)]="formulaire.email">
+          </div>
+          <div class="form-field">
+            <label for="dialog-prenom">Prénom <span class="required">*</span></label>
+            <input id="dialog-prenom" class="form-control" name="prenom"
+              required maxlength="100" [(ngModel)]="formulaire.prenom">
+          </div>
+          <div class="form-field">
+            <label for="dialog-nom">Nom <span class="required">*</span></label>
+            <input id="dialog-nom" class="form-control" name="nom"
+              required maxlength="100" [(ngModel)]="formulaire.nom">
+          </div>
+          @if (!estProfil) {
+            <div class="form-field">
+              <label for="dialog-role">Rôle <span class="required">*</span></label>
+              <select id="dialog-role" class="form-control" name="role"
+                [(ngModel)]="formulaire.role">
+                @for (item of roles; track item) {
+                  <option [ngValue]="item.code">{{ item.label }}</option>
+                }
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="dialog-password">
+                {{ estCreation ? 'Mot de passe' : 'Nouveau mot de passe' }}
+                @if (estCreation) {
+                  <span class="required">*</span>
+                }
+              </label>
+              <input id="dialog-password" class="form-control" name="password" type="password"
+                minlength="8" maxlength="100" [required]="estCreation"
+                [(ngModel)]="formulaire.motDePasse">
+              @if (!estCreation) {
+                <small>Laissez vide pour conserver le mot de passe actuel.</small>
+              }
+            </div>
+            <label class="active-field">
+              <input type="checkbox" name="actif" [(ngModel)]="formulaire.actif">
+              <span>Compte actif</span>
+            </label>
+          } @else {
+            <div class="form-field">
+              <label>Rôle</label>
+              <input class="form-control" [value]="libelleRole" readonly>
+              <small>Le rôle est géré par un administrateur.</small>
+            </div>
+            <div class="form-field password-field">
+              <label>Mot de passe</label>
+              <div class="password-control">
+                <span>••••••••</span>
+                <button class="btn btn-secondary btn-compact" type="button"
+                (click)="passwordChangeRequested.emit()">Modifier</button>
+              </div>
+              <small>La modification est sécurisée par Keycloak.</small>
+            </div>
+          }
+        </div>
+        <footer>
+          <button class="btn btn-secondary" type="button" (click)="closed.emit()">Annuler</button>
+          <button class="btn btn-primary" type="submit" [disabled]="chargement">
+            {{ chargement ? 'Enregistrement…' : (estCreation ? 'Créer l’utilisateur' : 'Enregistrer') }}
+          </button>
+        </footer>
+      </form>
+    </article>
+  </div>
+}

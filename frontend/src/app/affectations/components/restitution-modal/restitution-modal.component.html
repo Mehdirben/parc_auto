@@ -1,0 +1,23 @@
+<app-form-modal [open]="!!affectation" size="small" eyebrow="Retour au parc"
+  title="Restituer le véhicule" (closed)="closed.emit()">
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    @if (affectation; as item) {
+      <p class="restitution-summary">
+        <strong>{{ item.immatriculation }}</strong> sera rendu disponible dans le parc.
+      </p>
+    }
+    <div class="form-grid">
+      <app-form-field class="full-width" label="Date de restitution" controlId="dateRestitution" [required]="true">
+        <input class="form-control" id="dateRestitution" type="date" formControlName="dateRestitution"
+          [min]="affectation?.dateDebut" [max]="today">
+      </app-form-field>
+      <app-form-field class="full-width" label="Motif" controlId="motifRestitution" [required]="true">
+        <textarea class="form-control" id="motifRestitution" rows="3" maxlength="500" formControlName="motif"></textarea>
+      </app-form-field>
+    </div>
+    <footer>
+      <button class="btn btn-secondary" type="button" (click)="closed.emit()">Annuler</button>
+      <button class="btn btn-primary" type="submit" [disabled]="saving">Confirmer la restitution</button>
+    </footer>
+  </form>
+</app-form-modal>

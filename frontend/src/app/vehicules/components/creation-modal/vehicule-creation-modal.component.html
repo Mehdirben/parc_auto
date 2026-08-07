@@ -1,0 +1,32 @@
+<app-form-modal [open]="open" eyebrow="Nouveau véhicule" title="Créer un véhicule" (closed)="closed.emit()">
+  <form [formGroup]="form" (ngSubmit)="enregistrer()">
+    <div class="form-grid">
+      <app-form-field label="Immatriculation" controlId="immatriculation" [required]="true"
+        help="Format normal : 12345-A-10 · Fonctionnaire : 1234567"
+        [error]="form.controls.immatriculation.touched && form.controls.immatriculation.invalid ? 'Saisissez une immatriculation marocaine normale ou fonctionnaire.' : ''">
+        <input class="form-control" id="immatriculation" [formControl]="form.controls.immatriculation"
+          maxlength="50" placeholder="12345-A-10 ou 1234567">
+      </app-form-field>
+      <app-form-field label="Ancienne immatriculation" controlId="ancienneImmatriculation"><input class="form-control" id="ancienneImmatriculation" [formControl]="form.controls.ancienneImmatriculation" maxlength="50"></app-form-field>
+      <app-form-field label="Marque" controlId="marqueVehicule" [required]="true"><select class="form-control" id="marqueVehicule" [formControl]="form.controls.marqueCode"><option value="">Sélectionner…</option>@for (marque of marques; track marque) {
+      <option [value]="marque.code">{{ marque.designation }}</option>
+    }</select></app-form-field>
+    <app-form-field label="Modèle" controlId="modeleVehicule" [required]="true" help="La liste dépend de la marque sélectionnée."><select class="form-control" id="modeleVehicule" [formControl]="form.controls.modeleId"><option value="">Sélectionner…</option>@for (modele of modeles; track modele) {
+    <option [value]="modele.id">{{ modele.nom }}</option>
+  }</select></app-form-field>
+  <app-form-field label="VIN" controlId="vin" [required]="true" [error]="form.controls.vin.touched && form.controls.vin.invalid ? 'Le VIN est obligatoire.' : ''"><input class="form-control" id="vin" [formControl]="form.controls.vin" maxlength="50"></app-form-field>
+  <app-form-field label="Genre" controlId="genre" [required]="true"><select class="form-control" id="genre" [formControl]="form.controls.genre"><option value="VOITURE_TOURISME">Voiture de tourisme</option><option value="FOURGONNETTE_VITREE">Fourgonnette vitrée</option><option value="FOURGONNETTE">Fourgonnette</option><option value="MINIBUS">Minibus</option><option value="UTILITAIRE">Utilitaire</option><option value="CYCLOMOTEUR">Cyclomoteur</option></select></app-form-field>
+  <app-form-field label="Carburant" controlId="carburant" [required]="true"><select class="form-control" id="carburant" [formControl]="form.controls.carburant"><option value="DIESEL">Diesel</option><option value="ESSENCE">Essence</option><option value="HYBRIDE">Hybride</option><option value="ELECTRIQUE">Électrique</option><option value="MELANGE">Mélange</option></select></app-form-field>
+  <app-form-field label="Nombre de cylindres" controlId="cylindres"><input class="form-control" id="cylindres" type="number" min="1" [formControl]="form.controls.nombreCylindres"></app-form-field>
+  <app-form-field label="Puissance fiscale (CV)" controlId="puissance" [required]="true"><input class="form-control" id="puissance" type="number" min="1" [formControl]="form.controls.puissanceFiscale"></app-form-field>
+  <app-form-field label="Kilométrage initial" controlId="kilometrageInitial" [required]="true"><input class="form-control" id="kilometrageInitial" type="number" min="0" [formControl]="form.controls.kilometrageInitial"></app-form-field>
+  <app-form-field label="Poids à vide (kg)" controlId="poidsVide"><input class="form-control" id="poidsVide" type="number" min="0.01" step="0.01" [formControl]="form.controls.poidsVide"></app-form-field>
+  <app-form-field label="Poids total en charge (kg)" controlId="poidsTotal"><input class="form-control" id="poidsTotal" type="number" min="0.01" step="0.01" [formControl]="form.controls.poidsTotalCharge"></app-form-field>
+  <app-form-field label="1ère mise en circulation" controlId="dateMec"><input class="form-control" id="dateMec" type="date" [max]="aujourdHui" [formControl]="form.controls.datePremiereMiseCirculation"></app-form-field>
+  <app-form-field label="Date de mutation" controlId="dateMutation"><input class="form-control" id="dateMutation" type="date" [max]="aujourdHui" [formControl]="form.controls.dateMutation"></app-form-field>
+  <app-form-field label="Statut" controlId="statutCreation" [required]="true"><select class="form-control" id="statutCreation" [formControl]="form.controls.statut"><option value="DISPONIBLE">Disponible</option><option value="AFFECTE">Affecté</option><option value="IMMOBILISE">Immobilisé</option><option value="EN_MAINTENANCE">En maintenance</option><option value="REFORME">Réformé</option><option value="INACTIF">Inactif</option></select></app-form-field>
+  <app-form-field label="État général" controlId="etatCreation" [required]="true"><select class="form-control" id="etatCreation" [formControl]="form.controls.etatGeneral"><option value="BON_ETAT">Bon état</option><option value="ETAT_MOYEN">État moyen</option><option value="MAUVAIS_ETAT">Mauvais état</option></select></app-form-field>
+</div>
+<footer><button class="btn btn-secondary" type="button" (click)="closed.emit()">Annuler</button><button class="btn btn-primary" type="submit" [disabled]="enregistrement">{{ enregistrement ? 'Création…' : 'Créer le véhicule' }}</button></footer>
+</form>
+</app-form-modal>

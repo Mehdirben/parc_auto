@@ -11,6 +11,10 @@
   border-radius: var(--radius-lg);
 }
 
+:host-context(.list-panel) .empty-state {
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+
 .empty-icon {
   display: grid;
   width: 58px;

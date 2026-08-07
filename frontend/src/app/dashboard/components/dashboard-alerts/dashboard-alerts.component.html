@@ -1,0 +1,35 @@
+<section class="panel alerts-panel" aria-labelledby="dashboard-alerts-title">
+  <header class="panel-header">
+    <div>
+      <span class="section-kicker">À surveiller</span>
+      <h2 id="dashboard-alerts-title">Points de vigilance</h2>
+    </div>
+  </header>
+
+  <div class="alerts-list">
+    @if (loading) {
+      @for (placeholder of [1, 2, 3, 4]; track placeholder) {
+        <div class="alert-placeholder skeleton"></div>
+      }
+    } @else {
+      @for (alert of alerts; track alert.label) {
+        <a
+          [routerLink]="alert.route"
+          [queryParams]="alert.queryParams"
+          [class]="'alert-row ' + alert.tone">
+          <span class="alert-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path fill="currentColor" [attr.d]="alert.icon"/>
+            </svg>
+          </span>
+          <span class="alert-copy">
+            <strong>{{ alert.label }}</strong>
+            <small>{{ alert.description }}</small>
+          </span>
+          <b>{{ alert.value }}</b>
+          <span class="arrow" aria-hidden="true">›</span>
+        </a>
+      }
+    }
+  </div>
+</section>

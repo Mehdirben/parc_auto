@@ -2,7 +2,9 @@
   <div class="crud-search-box">
     <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><path fill="currentColor" d="M9.5 3a6.5 6.5 0 1 0 4.1 11.54L19.06 20 20.5 18.56l-5.46-5.46A6.5 6.5 0 0 0 9.5 3Zm0 2a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Z"/></svg>
     <input type="search" [formControl]="control" [placeholder]="placeholder" [attr.aria-label]="ariaLabel">
-    <button type="button" *ngIf="control.value" aria-label="Effacer la recherche" (click)="control.setValue('')">×</button>
+    @if (control.value) {
+      <button type="button" aria-label="Effacer la recherche" (click)="control.setValue('')">×</button>
+    }
   </div>
   <div class="crud-toolbar-actions">
     <ng-content></ng-content>

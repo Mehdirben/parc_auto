@@ -1,4 +1,4 @@
-<#-- MESRSI Parc Automobile - Keycloak login page -->
+<#-- White-label Parc Automobile - Keycloak login page -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -27,13 +27,13 @@
                         </svg>
                     </div>
                     <div>
-                        <span class="brand-name">PARC MESRSI</span>
-                        <span class="brand-caption">Gestion automobile</span>
+                        <span class="brand-name">PARC AUTOMOBILE</span>
+                        <span class="brand-caption">Gestion de flotte</span>
                     </div>
                 </div>
 
                 <div class="brand-message">
-                    <span class="brand-kicker">ROYAUME DU MAROC</span>
+                    <span class="brand-kicker">GESTION DE FLOTTE</span>
                     <h1>Le parc automobile,<br>piloté simplement.</h1>
                     <p>Un espace centralisé et sécurisé pour gérer les référentiels, les véhicules, les affectations et les documents du parc.</p>
                 </div>
@@ -47,7 +47,7 @@
                     </div>
                 </div>
 
-                <div class="brand-ministry">Ministère de l'Enseignement Supérieur,<br>de la Recherche Scientifique et de l'Innovation</div>
+                <div class="brand-ministry">Une gestion centralisée,<br>fiable et sécurisée</div>
             </aside>
 
             <section class="form-panel">
@@ -55,7 +55,7 @@
                     <span class="mobile-emblem">
                         <svg viewBox="0 0 48 48" width="34" height="34"><path d="M24 4 42 14v20L24 44 6 34V14L24 4Z" fill="none" stroke="currentColor" stroke-width="2"/><path d="m24 12 3.3 7.7 8.3.7-6.3 5.5 1.9 8.1-7.2-4.2-7.2 4.2 1.9-8.1-6.3-5.5 8.3-.7L24 12Z" fill="currentColor"/></svg>
                     </span>
-                    <span><strong>PARC MESRSI</strong><small>Gestion automobile</small></span>
+                    <span><strong>PARC AUTOMOBILE</strong><small>Gestion de flotte</small></span>
                 </div>
 
                 <div class="form-content">
@@ -128,7 +128,7 @@
                         <span class="security-mark">
                             <svg viewBox="0 0 24 24"><path fill="currentColor" d="M18 8h-1V6a5 5 0 0 0-10 0v2H6a2 2 0 0 0-2 2v10h12V10a2 2 0 0 0-2-2Zm-3 0H9V6a3 3 0 0 1 6 0Z"/></svg>
                         </span>
-                        <span>Accès réservé aux utilisateurs habilités du MESRSI</span>
+                        <span>Accès réservé aux utilisateurs habilités</span>
                     </footer>
                 </div>
             </section>

@@ -1,0 +1,132 @@
+<app-page-header
+  eyebrow="Référentiels"
+  title="Modèles"
+  description="Consultez et administrez tous les modèles de véhicules du parc.">
+  @if (permissions.peutModifier) {
+    <button class="btn btn-primary" type="button" (click)="ouvrirCreation()">
+      <svg viewBox="0 0 24 24" width="17" height="17"><path fill="currentColor" d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5Z"/></svg>
+      Ajouter un modèle
+    </button>
+  }
+</app-page-header>
+
+<section class="summary-grid">
+  <app-summary-card [value]="page.totalElements" label="Modèles enregistrés" [icon]="modelesIcon"></app-summary-card>
+  <app-summary-card [value]="statistiques.totalMarques" label="Marques représentées" [icon]="marquesIcon" tone="gold"></app-summary-card>
+</section>
+
+<section class="panel list-panel" [attr.aria-busy]="chargement">
+  <app-search-toolbar
+    [control]="recherche"
+    placeholder="Rechercher un modèle ou une marque…"
+    ariaLabel="Rechercher un modèle ou une marque"
+    (refreshed)="charger()">
+  </app-search-toolbar>
+
+  @if (page.contenu.length) {
+    <app-data-table>
+      <table class="data-table">
+        <thead>
+          <tr><th>Modèle</th><th>Marque</th><th>Code marque</th><th>Création</th><th class="actions-column">Actions</th></tr>
+        </thead>
+        <tbody>
+          @for (modele of page.contenu; track identifierModele($index, modele)) {
+            <tr>
+              <td><button class="model-link" type="button" (click)="consulter(modele)">{{ modele.nom }}</button></td>
+              <td>{{ modele.marqueDesignation }}</td>
+              <td><span class="code-chip">{{ modele.marqueCode }}</span></td>
+              <td>
+                <div class="audit-cell">
+                  <span>{{ modele.dateCreation | date:'dd/MM/yyyy' }}</span>
+                  <small>par {{ modele.creePar }}</small>
+                </div>
+              </td>
+              <td class="actions-cell">
+                <app-table-action kind="view" label="Consulter l’historique du modèle" (triggered)="consulter(modele)"></app-table-action>
+                @if (permissions.peutModifier) {
+                  <app-table-action kind="edit" label="Modifier le modèle" (triggered)="ouvrirModification(modele)"></app-table-action>
+                }
+                @if (permissions.peutModifier) {
+                  <app-table-action kind="delete" label="Supprimer le modèle" (triggered)="modeleASupprimer = modele"></app-table-action>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </app-data-table>
+  }
+
+  @if (chargement && !page.contenu.length) {
+    <app-table-loading></app-table-loading>
+  }
+
+  @if (!chargement && !page.contenu.length && !erreur) {
+    <app-empty-state
+      title="Aucun modèle trouvé"
+      [description]="recherche.value ? 'Aucun résultat ne correspond à votre recherche.' : 'Commencez par ajouter le premier modèle du référentiel.'">
+      @if (permissions.peutModifier && !recherche.value) {
+        <button class="btn btn-primary" type="button" (click)="ouvrirCreation()">Ajouter un modèle</button>
+      }
+    </app-empty-state>
+  }
+
+  @if (!chargement && erreur) {
+    <app-empty-state title="Chargement impossible" [description]="erreur">
+      <button class="btn btn-secondary" type="button" (click)="charger()">Réessayer</button>
+    </app-empty-state>
+  }
+
+  @if (page.contenu.length) {
+    <app-pagination
+      [page]="page.page"
+      [pageSize]="page.taille"
+      [totalItems]="page.totalElements"
+      [totalPages]="page.totalPages"
+      [first]="page.premiere"
+      [last]="page.derniere"
+      [disabled]="chargement"
+      (pageChange)="charger($event)">
+    </app-pagination>
+  }
+</section>
+
+<app-detail-modal
+  [open]="chargementDetail || !!selection"
+  [loading]="chargementDetail"
+  loadingText="Chargement du modèle…"
+  eyebrow="Fiche modèle"
+  [title]="selection?.nom || ''"
+  [code]="selection?.marqueCode || ''"
+  ariaLabel="Détail du modèle"
+  (closed)="selection = null">
+  @if (selection; as modele) {
+    <dl class="identity-grid">
+      <div><dt>Marque</dt><dd>{{ modele.marqueDesignation }}</dd></div>
+      <div><dt>Code marque</dt><dd><span class="code-chip">{{ modele.marqueCode }}</span></dd></div>
+    </dl>
+    <app-audit-trail [createdAt]="modele.dateCreation" [createdBy]="modele.creePar" [updatedAt]="modele.dateModification" [updatedBy]="modele.modifiePar || ''"></app-audit-trail>
+    <app-activity-timeline title="Historique du modèle" [items]="historique"></app-activity-timeline>
+  }
+</app-detail-modal>
+
+<app-modele-form-modal
+  [open]="dialogOuvert"
+  [mode]="dialogMode"
+  [saving]="enregistrement"
+  [marques]="marques"
+  [marqueCode]="modeleModifie?.marqueCode || ''"
+  [modeleNom]="modeleModifie?.nom || ''"
+  (closed)="dialogOuvert = false"
+  (submitted)="enregistrer($event)">
+</app-modele-form-modal>
+
+<app-confirm-dialog
+  [open]="!!modeleASupprimer"
+  [destructive]="true"
+  title="Confirmer la suppression"
+  [message]="'Voulez-vous supprimer « ' + (modeleASupprimer?.nom || '') + ' » ? Cette action sera refusée si le modèle est utilisé par un véhicule.'"
+  confirmLabel="Supprimer"
+  (cancelled)="modeleASupprimer = null"
+  (confirmed)="confirmerSuppression()">
+</app-confirm-dialog>

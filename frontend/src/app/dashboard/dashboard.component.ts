@@ -1,62 +1,200 @@
-import { Component, Inject, OnInit, Optional, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Inject, OnDestroy, OnInit, Optional, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import Keycloak from 'keycloak-js';
+import { Observable, catchError, forkJoin, of } from 'rxjs';
 import { KEYCLOAK, KeycloakTokenParsed } from '../tokens';
+import { AffectationService } from '../affectations/data-access/affectation.service';
+import { ConducteurService } from '../conducteurs/data-access/conducteur.service';
+import { AuthenticationService } from '../core/authentication.service';
+import { ServiceParcService } from '../services-parcs/data-access/service-parc.service';
+import { APP_ICONS } from '../shared/icons/app-icons';
 import { HeroBannerComponent } from '../shared/ui/hero-banner/hero-banner.component';
-import { PageHeaderComponent } from '../shared/ui/page-header/page-header.component';
-import { StatCardComponent, StatCardTone } from '../shared/ui/stat-card/stat-card.component';
-import { ServiceParcService } from '../referentiels/services-parcs/service-parc.service';
+import { SummaryCardComponent, SummaryCardTone } from '../shared/ui/summary-card/summary-card.component';
+import { nomAffichage } from '../shared/utils/keycloak-identity';
+import { VehiculeService } from '../vehicules/data-access/vehicule.service';
+import { DashboardAlertsComponent } from './components/dashboard-alerts/dashboard-alerts.component';
+import { FleetStatusComponent } from './components/fleet-status/fleet-status.component';
+import { RecentAssignmentsComponent } from './components/recent-assignments/recent-assignments.component';
+import {
+  DashboardAlert, FleetSegment, FleetSegmentTone, RecentAffectation
+} from './models/dashboard.models';
 
 interface DashboardMetric {
   label: string;
   value: string | number;
-  tone: StatCardTone;
+  tone: SummaryCardTone;
   icon: string;
+  route: string;
 }
 
 @Component({
   selector: 'app-dashboard',
-  standalone: true,
-  imports: [CommonModule, HeroBannerComponent, PageHeaderComponent, StatCardComponent],
+  imports: [
+    RouterLink, HeroBannerComponent, SummaryCardComponent,
+    DashboardAlertsComponent, FleetStatusComponent, RecentAssignmentsComponent
+  ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   private readonly serviceParc = inject(ServiceParcService);
+  private readonly vehicules = inject(VehiculeService);
+  private readonly conducteurs = inject(ConducteurService);
+  private readonly affectations = inject(AffectationService);
+  private readonly authentication = inject(AuthenticationService);
 
   isAuthenticated = false;
   fullName = '';
-
-  readonly metrics: DashboardMetric[] = [
-    { label: 'Véhicules', value: '—', tone: 'green', icon: 'M18.92 6.01 17.08 2.33A2 2 0 0 0 15.29 1H8.71a2 2 0 0 0-1.79 1.33L5.08 6.01A3 3 0 0 0 3 8.86V17a2 2 0 0 0 2 2h1v2h2v-2h8v2h2v-2h1a2 2 0 0 0 2-2V8.86a3 3 0 0 0-2.08-2.85ZM7 15a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm10 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4Z' },
-    { label: 'Affectations actives', value: '—', tone: 'gold', icon: 'M19 3h-4.18A3 3 0 0 0 9.18 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Zm-7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2Zm-2 14-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8Z' },
-    { label: 'Conducteurs actifs', value: '—', tone: 'blue', icon: 'M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2ZM8 7.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5ZM12 17H4v-.75c0-1.66 2.67-2.75 4-2.75s4 1.09 4 2.75V17Zm7-1h-5v-2h5v2Zm0-4h-5v-2h5v2Z' },
-    { label: 'Services et parcs', value: '—', tone: 'slate', icon: 'M12 3 2 8v2h20V8L12 3ZM4 12v7H2v2h20v-2h-2v-7h-2v7h-4v-7h-4v7H6v-7H4Z' }
-  ];
+  loading = false;
+  loadingVisible = false;
+  erreursChargement = 0;
+  dateMiseAJour = '';
+  metrics: DashboardMetric[] = this.metricsInitiales();
+  fleetTotal: number | string = '—';
+  fleetSegments: FleetSegment[] = [];
+  alerts: DashboardAlert[] = [];
+  recentAssignments: RecentAffectation[] = [];
+  readonly refreshIcon = APP_ICONS.refresh;
+  private loadingTimer?: ReturnType<typeof setTimeout>;
 
   constructor(@Optional() @Inject(KEYCLOAK) private readonly keycloak: Keycloak | null) {}
 
   ngOnInit(): void {
     this.isAuthenticated = !!this.keycloak?.authenticated;
-
-    this.serviceParc.statistiques().subscribe({
-      next: (stats) => {
-        const metric = this.metrics.find(m => m.label === 'Services et parcs');
-        if (metric) {
-          metric.value = stats.total;
-        }
-      },
-      error: () => {}
-    });
-
-    if (!this.keycloak?.tokenParsed) {
-      return;
+    if (this.keycloak?.tokenParsed) {
+      this.fullName = nomAffichage(this.keycloak.tokenParsed as KeycloakTokenParsed);
     }
-    const token = this.keycloak.tokenParsed as KeycloakTokenParsed;
+    if (this.isAuthenticated) this.charger();
+  }
 
-    const given = token.given_name ?? '';
-    const family = token.family_name ?? '';
-    const computedName = `${given} ${family}`.trim();
-    this.fullName = (token.name ?? computedName) || 'Utilisateur';
+  ngOnDestroy(): void {
+    if (this.loadingTimer) clearTimeout(this.loadingTimer);
+  }
+
+  connexion(): void {
+    this.authentication.login();
+  }
+
+  charger(): void {
+    if (!this.isAuthenticated || this.loading) return;
+    this.loading = true;
+    if (!this.dateMiseAJour) {
+      this.loadingTimer = setTimeout(() => this.loadingVisible = true, 180);
+    }
+    this.erreursChargement = 0;
+
+    forkJoin({
+      vehicules: this.tolérerErreur(this.vehicules.statistiques()),
+      conducteurs: this.tolérerErreur(this.conducteurs.statistiques()),
+      services: this.tolérerErreur(this.serviceParc.statistiques()),
+      affectations: this.tolérerErreur(
+        this.affectations.rechercher('', 'ACTIVE', '', 0, 5)),
+      missionsÀGénérer: this.tolérerErreur(
+        this.affectations.rechercher('', 'ACTIVE', 'A_GENERER', 0, 1))
+    }).subscribe(résultat => {
+      const véhicules = résultat.vehicules;
+      const conducteurs = résultat.conducteurs;
+      const services = résultat.services;
+      const affectations = résultat.affectations;
+      const missionsÀGénérer = résultat.missionsÀGénérer?.totalElements;
+
+      this.metrics = [
+        this.metric('Véhicules recensés', véhicules?.total, 'green',
+          APP_ICONS.vehicule, '/vehicules'),
+        this.metric('Véhicules disponibles', véhicules?.disponibles, 'green',
+          APP_ICONS.actif, '/vehicules'),
+        this.metric('Affectations actives', affectations?.totalElements, 'gold',
+          APP_ICONS.affectation, '/affectations'),
+        this.metric('Conducteurs actifs', conducteurs?.actifs, 'blue',
+          APP_ICONS.conducteur, '/referentiels/conducteurs'),
+        this.metric('Services actifs', services?.actifs, 'slate',
+          APP_ICONS.serviceParc, '/referentiels/services-parcs')
+      ];
+
+      this.fleetTotal = véhicules?.total ?? '—';
+      this.fleetSegments = véhicules ? this.construireSegments(
+        véhicules.total,
+        [
+          ['Disponibles', véhicules.disponibles, 'available'],
+          ['Affectés', véhicules.affectes, 'assigned'],
+          ['En maintenance', véhicules.enMaintenance, 'maintenance'],
+          ['Immobilisés', véhicules.immobilises, 'immobilized'],
+          ['Réformés', véhicules.reformes, 'reformed'],
+          ['Inactifs', véhicules.inactifs, 'inactive']
+        ]
+      ) : [];
+
+      this.alerts = [
+        this.alerte('Véhicules immobilisés', 'Intervention ou décision requise',
+          véhicules?.immobilises, 'danger', APP_ICONS.indisponible, '/vehicules',
+          { statut: 'IMMOBILISE' }),
+        this.alerte('Véhicules en maintenance', 'Suivi des indisponibilités',
+          véhicules?.enMaintenance, 'warning', APP_ICONS.maintenance, '/vehicules',
+          { statut: 'EN_MAINTENANCE' }),
+        this.alerte('Permis expirés', 'Conducteurs non affectables',
+          conducteurs?.permisExpires, 'danger', APP_ICONS.permis,
+          '/referentiels/conducteurs', { permis: 'EXPIRE' }),
+        this.alerte('Permis à renouveler', 'Échéance dans les 30 jours',
+          conducteurs?.permisExpirantBientot, 'warning', APP_ICONS.permis,
+          '/referentiels/conducteurs', { permis: 'A_RENOUVELER' }),
+        this.alerte('Ordres de mission à générer', 'Affectations de mission éligibles',
+          missionsÀGénérer, 'info', APP_ICONS.mission, '/affectations',
+          { statut: 'ACTIVE', ordreMission: 'A_GENERER' })
+      ];
+      this.recentAssignments = affectations?.contenu ?? [];
+      this.dateMiseAJour = new Intl.DateTimeFormat('fr-MA', {
+        hour: '2-digit', minute: '2-digit'
+      }).format(new Date());
+      if (this.loadingTimer) clearTimeout(this.loadingTimer);
+      this.loadingVisible = false;
+      this.loading = false;
+    });
+  }
+
+  private tolérerErreur<T>(source: Observable<T>): Observable<T | null> {
+    return source.pipe(catchError(() => {
+      this.erreursChargement++;
+      return of(null);
+    }));
+  }
+
+  private metricsInitiales(): DashboardMetric[] {
+    return [
+      this.metric('Véhicules recensés', undefined, 'green', APP_ICONS.vehicule, '/vehicules'),
+      this.metric('Véhicules disponibles', undefined, 'green', APP_ICONS.actif, '/vehicules'),
+      this.metric('Affectations actives', undefined, 'gold', APP_ICONS.affectation, '/affectations'),
+      this.metric('Conducteurs actifs', undefined, 'blue', APP_ICONS.conducteur,
+        '/referentiels/conducteurs'),
+      this.metric('Services actifs', undefined, 'slate', APP_ICONS.serviceParc,
+        '/referentiels/services-parcs')
+    ];
+  }
+
+  private metric(
+    label: string, value: number | undefined, tone: SummaryCardTone,
+    icon: string, route: string
+  ): DashboardMetric {
+    return { label, value: value ?? '—', tone, icon, route };
+  }
+
+  private alerte(
+    label: string, description: string, value: number | undefined,
+    tone: DashboardAlert['tone'], icon: string, route: string,
+    queryParams?: Record<string, string>
+  ): DashboardAlert {
+    return {
+      label, description, value: value ?? '—',
+      tone: value === 0 ? 'success' : tone, icon, route, queryParams
+    };
+  }
+
+  private construireSegments(
+    total: number,
+    valeurs: Array<[string, number, FleetSegmentTone]>
+  ): FleetSegment[] {
+    return valeurs.map(([label, value, tone]) => ({
+      label, value, tone,
+      percentage: total === 0 ? 0 : Math.round((value / total) * 100)
+    }));
   }
 }

@@ -1,0 +1,31 @@
+.assignment-summary { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.vehicle-registration { color: var(--color-ink); font-size: .78rem; font-weight: 750; }
+.secondary-line { display: block; margin-top: 4px; color: var(--color-muted); font-size: .66rem; }
+.identity-grid .wide { grid-column: 1 / -1; }
+.detail-section { margin-top: 22px; }
+.detail-section h3 { margin-bottom: 12px; color: var(--color-ink); font-size: .83rem; }
+.record-list { display: grid; gap: 8px; }
+.record-list article { display: grid; padding: 12px; gap: 3px; background: var(--color-surface-muted); border: 1px solid var(--color-border); border-radius: var(--radius-sm); }
+.record-list article strong { color: var(--color-ink); font-size: .78rem; }
+.record-list article span, .record-list article small { color: var(--color-muted); font-size: .7rem; }
+.record-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.mission-action { padding: 6px 9px; color: var(--color-primary-700); font-size: .62rem; font-weight: 800; white-space: nowrap; background: var(--color-primary-50); border: 1px solid var(--color-primary-100); border-radius: 6px; cursor: pointer; }
+.mission-action:hover { color: #fff; background: var(--color-primary-600); border-color: var(--color-primary-600); }
+.mission-history-action {
+  min-height: 34px;
+  padding-inline: 11px;
+  flex: 0 0 auto;
+  color: var(--color-primary-700);
+  font-size: .69rem;
+  white-space: nowrap;
+}
+.record-list article .mission-history-action span { color: inherit; font-size: inherit; }
+.mission-history-action svg { flex: 0 0 auto; }
+
+@media (max-width: 1050px) {
+  .assignment-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 600px) {
+  .assignment-summary { grid-template-columns: 1fr; }
+  .record-heading { align-items: flex-start; flex-direction: column; }
+}

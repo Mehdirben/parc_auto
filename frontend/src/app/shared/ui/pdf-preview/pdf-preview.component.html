@@ -1,0 +1,11 @@
+<div #container class="pdf-preview">
+  @if (loading || rendering) {
+    <div class="pdf-preview__loading">Préparation du document…</div>
+  }
+  @if (errorMessage) {
+    <div class="pdf-preview__error" role="alert">{{ errorMessage }}</div>
+  }
+  <canvas #canvas class="pdf-preview__canvas"
+    [hidden]="loading || rendering || errorMessage"
+    role="img" [attr.aria-label]="ariaLabel"></canvas>
+</div>

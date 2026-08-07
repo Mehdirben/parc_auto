@@ -1,4 +1,4 @@
 <article class="summary-card">
-  <span class="summary-icon" [class.gold]="tone === 'gold'"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" [attr.d]="icon"/></svg></span>
+  <span class="summary-icon" [class]="'summary-icon ' + tone"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" [attr.d]="icon"/></svg></span>
   <div><strong>{{ value }}</strong><span>{{ label }}</span></div>
 </article>

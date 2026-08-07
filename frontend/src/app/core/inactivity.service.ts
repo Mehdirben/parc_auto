@@ -1,7 +1,8 @@
 import { Injectable, Inject, Optional, NgZone, OnDestroy } from '@angular/core';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import Keycloak from 'keycloak-js';
 import { KEYCLOAK } from '../tokens';
+import { AuthenticationService } from './authentication.service';
 
 /** How many minutes of inactivity before showing the warning modal. */
 const IDLE_TIMEOUT_MINUTES = 30;
@@ -24,7 +25,6 @@ export class InactivityService implements OnDestroy {
   /** Remaining seconds on the countdown (only meaningful when showWarning$ is true). */
   readonly countdown$ = new BehaviorSubject<number>(WARNING_COUNTDOWN_SECONDS);
 
-  private readonly destroy$ = new Subject<void>();
   private idleTimer: ReturnType<typeof setTimeout> | null = null;
   private countdownTimer: ReturnType<typeof setInterval> | null = null;
 
@@ -35,7 +35,8 @@ export class InactivityService implements OnDestroy {
 
   constructor(
     @Optional() @Inject(KEYCLOAK) private readonly keycloak: Keycloak | null,
-    private readonly zone: NgZone
+    private readonly zone: NgZone,
+    private readonly authentication: AuthenticationService
   ) {}
 
   /**
@@ -67,8 +68,6 @@ export class InactivityService implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
     this.clearTimers();
 
     for (const event of this.activityEvents) {
@@ -94,7 +93,7 @@ export class InactivityService implements OnDestroy {
       this.lastTokenRefreshTime = now;
       this.keycloak?.updateToken(70).catch(() => {
         console.warn('Session expired during active use — redirecting to login.');
-        void this.keycloak?.login({ redirectUri: window.location.origin });
+        this.authentication.login();
       });
     }
   };
@@ -122,7 +121,7 @@ export class InactivityService implements OnDestroy {
         this.clearTimers();
         this.zone.run(() => {
           this.showWarning$.next(false);
-          this.keycloak?.logout({ redirectUri: window.location.origin });
+          this.authentication.logout();
         });
       }
     }, 1000);

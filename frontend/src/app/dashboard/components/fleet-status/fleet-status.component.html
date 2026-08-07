@@ -1,0 +1,67 @@
+<section class="panel fleet-panel" aria-labelledby="fleet-status-title">
+  <header class="panel-header">
+    <div>
+      <span class="section-kicker">Disponibilité</span>
+      <h2 id="fleet-status-title">Situation du parc</h2>
+    </div>
+    <a class="panel-link" routerLink="/vehicules">Voir les véhicules</a>
+  </header>
+
+  <div class="panel-body">
+    @if (loading) {
+      <div class="fleet-total">
+        <strong class="skeleton">0</strong>
+        <span>véhicules recensés</span>
+      </div>
+      <div class="status-skeleton skeleton" aria-label="Chargement de la situation"></div>
+    } @else {
+      @if (hasVehicles) {
+        <div class="fleet-overview">
+          <div class="fleet-total">
+            <strong>{{ total }}</strong>
+            <span>véhicules recensés</span>
+          </div>
+          <div class="availability-rate">
+            <strong>{{ availablePercentage }} %</strong>
+            <span>disponibles</span>
+          </div>
+        </div>
+
+        <div class="status-bar" aria-label="Répartition des véhicules par statut">
+          @for (segment of segments; track segment.label) {
+            @if (segment.value > 0) {
+              <span
+                [class]="'segment ' + segment.tone"
+                [style.width.%]="segment.percentage"
+                [attr.title]="segment.label + ' : ' + segment.value">
+              </span>
+            }
+          }
+        </div>
+      } @else {
+        <div class="fleet-empty">
+          <span class="empty-marker" aria-hidden="true"></span>
+          <div>
+            <strong>{{ hasKnownTotal ? 'Aucun véhicule recensé' : 'Situation indisponible' }}</strong>
+            <span>
+              {{ hasKnownTotal
+                ? 'La répartition apparaîtra dès l’ajout ou l’import d’un véhicule.'
+                : 'Les indicateurs n’ont pas pu être récupérés.' }}
+            </span>
+          </div>
+        </div>
+      }
+
+      <ul class="status-list">
+        @for (segment of segments; track segment.label) {
+          <li>
+            <span [class]="'legend ' + segment.tone"></span>
+            <span class="segment-label">{{ segment.label }}</span>
+            <strong>{{ segment.value }}</strong>
+            <small>{{ segment.percentage }} %</small>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+</section>

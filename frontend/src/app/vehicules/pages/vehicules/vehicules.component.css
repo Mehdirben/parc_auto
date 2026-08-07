@@ -1,0 +1,39 @@
+.vehicle-summary { grid-template-columns: repeat(4, minmax(180px, 1fr)); }
+.entity-link { color: var(--color-ink); font-size: .78rem; font-weight: 750; text-align: left; background: none; border: 0; cursor: pointer; }
+.entity-link:hover { color: var(--color-primary-600); text-decoration: underline; }
+.model-cell { display: flex; flex-direction: column; gap: 2px; }
+.model-cell strong { color: var(--color-ink); font-size: .73rem; }
+.model-cell small { color: var(--color-muted); font-size: .64rem; }
+.detail-actions { display: flex; margin-bottom: 16px; align-items: center; justify-content: space-between; gap: 12px; }
+.detail-actions > div { display: flex; align-items: center; gap: 10px; }
+.mileage { color: var(--color-primary-700); font-size: .78rem; font-weight: 800; }
+.tabs { display: flex; margin: 0 -22px 20px; padding: 0 22px; gap: 3px; overflow-x: auto; border-bottom: 1px solid var(--color-border); }
+.tabs button { padding: 10px 9px; color: var(--color-muted); font-size: .67rem; font-weight: 750; white-space: nowrap; background: none; border: 0; border-bottom: 2px solid transparent; cursor: pointer; }
+.tabs button.active { color: var(--color-primary-700); border-bottom-color: var(--color-primary-600); }
+.tabs span { padding: 1px 5px; background: var(--color-primary-50); border-radius: 8px; }
+.vehicle-identity { grid-template-columns: repeat(2, 1fr); }
+.current-assignment { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
+.current-assignment div { display: flex; padding: 12px; flex-direction: column; gap: 4px; background: var(--color-primary-50); border-radius: 8px; }
+.current-assignment span { color: var(--color-muted); font-size: .6rem; }
+.current-assignment strong { color: var(--color-primary-800); font-size: .72rem; }
+.subheading { margin: 24px 0 10px; color: var(--color-ink); font-size: .77rem; }
+
+@media (max-width: 1050px) { .vehicle-summary { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 620px) {
+  .vehicle-summary, .vehicle-identity, .current-assignment { grid-template-columns: 1fr; }
+  .detail-actions { align-items: flex-start; flex-direction: column; }
+}
+.assignment-navigation {
+  display: flex;
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  background: var(--color-primary-50);
+  border: 1px solid var(--color-primary-100);
+  border-radius: var(--radius-sm);
+}
+.assignment-navigation p { color: var(--color-primary-800); font-size: .72rem; }
+.current-assignment > button { grid-column: 1 / -1; justify-self: start; }
+.assignment-history-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; }

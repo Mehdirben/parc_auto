@@ -1,0 +1,11 @@
+.dynamic-text-list { display: grid; gap: 12px; }
+.dynamic-text-heading { display: flex; align-items: baseline; justify-content: space-between; }
+.dynamic-text-heading strong { color: var(--color-ink); font-size: .72rem; }
+.dynamic-text-heading small { color: var(--color-muted); font-size: .61rem; }
+.dynamic-text-row { display: grid; gap: 6px; }
+.dynamic-text-row > label { color: var(--color-text); font-size: .66rem; font-weight: 700; }
+.dynamic-text-row > div { position: relative; }
+.dynamic-text-row input { padding-right: 38px; }
+.dynamic-text-row button { position: absolute; top: 50%; right: 8px; width: 25px; height: 25px; color: var(--color-muted); font-size: 1rem; line-height: 1; background: var(--color-surface-muted); border: 0; border-radius: 6px; cursor: pointer; transform: translateY(-50%); }
+.dynamic-text-row button:hover { color: var(--color-danger-600); background: var(--color-danger-50); }
+.dynamic-text-error { color: var(--color-danger-600); font-size: .61rem; }

@@ -1,0 +1,30 @@
+<div class="account" [class.collapsed]="collapsed">
+  @if (authenticated) {
+    <button
+      class="identity"
+      type="button"
+      [attr.title]="collapsed ? 'Gérer mon compte' : null"
+      aria-label="Gérer mon compte"
+      (click)="accountOpened.emit()">
+      <span class="avatar">{{ initials }}</span>
+      <span class="identity-copy">
+        <strong>{{ fullName }}</strong>
+        <small>{{ (role || 'Utilisateur') | titlecase }}</small>
+      </span>
+    </button>
+    <button
+      class="session-action"
+      type="button"
+      [attr.title]="collapsed ? 'Déconnexion' : null"
+      aria-label="Déconnexion"
+      (click)="loggedOut.emit()">
+      <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><path fill="currentColor" d="M10 17v-2h4V9h-4V7h6v10h-6Zm-1-1-1.4-1.4L9.2 13H4v-2h5.2L7.6 9.4 9 8l4 4-4 4Z"/></svg>
+      <span>Déconnexion</span>
+    </button>
+  } @else {
+    <button class="login-action" type="button" (click)="loggedIn.emit()">
+      <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><path fill="currentColor" d="M10 17v-2h4V9h-4V7h6v10h-6Zm-1-1-1.4-1.4L9.2 13H4v-2h5.2L7.6 9.4 9 8l4 4-4 4Z"/></svg>
+      <span>Connexion</span>
+    </button>
+  }
+</div>

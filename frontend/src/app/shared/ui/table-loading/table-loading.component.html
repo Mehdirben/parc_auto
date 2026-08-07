@@ -1,5 +1,11 @@
-<div class="table-loading" aria-label="Chargement">
-  <div class="table-loading-row" *ngFor="let row of rowItems" [style.grid-template-columns]="columns">
-    <span class="skeleton" *ngFor="let cell of cellItems" [class.wide]="cell === 1" [class.medium]="cell === 3"></span>
+@if (visible) {
+  <div class="table-loading" aria-label="Chargement">
+    @for (row of rowItems; track row) {
+      <div class="table-loading-row" [style.grid-template-columns]="columns">
+        @for (cell of cellItems; track cell) {
+          <span class="skeleton" [class.wide]="cell === 1" [class.medium]="cell === 3"></span>
+        }
+      </div>
+    }
   </div>
-</div>
+}

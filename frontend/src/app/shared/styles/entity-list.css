@@ -1,0 +1,23 @@
+.summary-grid { display: grid; margin-bottom: 18px; grid-template-columns: repeat(2, minmax(220px, 1fr)); gap: 14px; }
+.list-panel { overflow: hidden; }
+.actions-column { text-align: right !important; }
+.actions-cell { display: flex; justify-content: flex-end; gap: 5px; }
+.entity-link {
+  padding: 0;
+  color: var(--color-ink);
+  font-size: .78rem;
+  font-weight: 750;
+  line-height: 1.25;
+  text-align: left;
+  background: none;
+  border: 0;
+  appearance: none;
+  cursor: pointer;
+}
+.entity-link:hover { color: var(--color-primary-600); text-decoration: underline; }
+.code-chip { padding: 5px 8px; color: var(--color-primary-700); font-family: monospace; font-size: .69rem; font-weight: 700; background: var(--color-primary-50); border-radius: 6px; }
+.audit-cell { display: flex; flex-direction: column; }
+.audit-cell span { color: var(--color-text); font-size: .72rem; }
+.audit-cell small { margin-top: 2px; color: var(--color-muted); font-size: .59rem; }
+
+@media (max-width: 760px) { .summary-grid { grid-template-columns: 1fr; } }

@@ -1,10 +1,14 @@
 import 'zone.js';
+import { registerLocaleData } from '@angular/common';
+import localeFr from '@angular/common/locales/fr';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { AppComponent } from './app/app.component';
 import { appConfig } from './app/app.config';
 import { KEYCLOAK, KEYCLOAK_ERROR } from './app/tokens';
 import { environment } from './environments/environment';
 import Keycloak from 'keycloak-js';
+
+registerLocaleData(localeFr);
 
 // Instantiate Keycloak client using environment-driven configuration
 const keycloak = new Keycloak({
@@ -13,23 +17,13 @@ const keycloak = new Keycloak({
   clientId: environment.clientId
 });
 
-// Initialize Keycloak before bootstrapping the Angular application.
-//
-// `check-sso` only checks whether a session already exists; it does NOT
-// force a redirect to Keycloak when unauthenticated. This lets you preview
-// the SPA without being bounced to Keycloak. For production, flip this back
-// to 'login-required' so every visitor must authenticate.
+// Check the existing SSO session before bootstrapping. Protected routes
+// trigger login through their guards when no session is active.
 keycloak.init({
   onLoad: 'check-sso',
   checkLoginIframe: false   // Disable background session-status iframe (avoids CSP frame blocks)
 })
-  .then((authenticated: boolean) => {
-    if (authenticated) {
-      console.log('Keycloak authentication successful');
-    } else {
-      console.info('No active Keycloak session; bootstrapping public shell.');
-    }
-
+  .then(() => {
     bootstrapApplication(AppComponent, {
       providers: [
         ...appConfig.providers,

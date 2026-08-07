@@ -1,0 +1,30 @@
+<app-form-modal [open]="open" eyebrow="Modification autorisée" title="Statut et état général" (closed)="closed.emit()">
+  <form [formGroup]="form" (ngSubmit)="enregistrer()">
+    <div class="form-grid">
+      <app-form-field label="Statut" controlId="statutSituation" [required]="true">
+        <select class="form-control" id="statutSituation" [formControl]="form.controls.statut"
+          [attr.aria-describedby]="vehicule?.affectationActuelle ? 'statutAffectationHelp' : null">
+          <option value="DISPONIBLE" [disabled]="!!vehicule?.affectationActuelle">Disponible</option>
+          <option value="AFFECTE" [disabled]="!vehicule?.affectationActuelle">Affecté</option>
+          <option value="IMMOBILISE" [disabled]="!!vehicule?.affectationActuelle">Immobilisé</option>
+          <option value="EN_MAINTENANCE" [disabled]="!!vehicule?.affectationActuelle">En maintenance</option>
+          <option value="REFORME" [disabled]="!!vehicule?.affectationActuelle">Réformé</option>
+          <option value="INACTIF" [disabled]="!!vehicule?.affectationActuelle">Inactif</option>
+        </select>
+      </app-form-field>
+      <app-form-field label="État général" controlId="etatSituation" [required]="true"><select class="form-control" id="etatSituation" [formControl]="form.controls.etatGeneral"><option value="BON_ETAT">Bon état</option><option value="ETAT_MOYEN">État moyen</option><option value="MAUVAIS_ETAT">Mauvais état</option></select></app-form-field>
+    </div>
+    @if (vehicule?.affectationActuelle) {
+      <app-information-notice id="statutAffectationHelp"
+        title="Statut géré par l’affectation"
+        message="Le statut Affecté est piloté par l’affectation active. Restituez d’abord le véhicule au parc pour changer ce statut.">
+      </app-information-notice>
+    } @else {
+      <app-information-notice
+        title="Informations verrouillées"
+        message="Les autres informations d’identification ne peuvent pas être modifiées.">
+      </app-information-notice>
+    }
+    <footer><button class="btn btn-secondary" type="button" (click)="closed.emit()">Annuler</button><button class="btn btn-primary" type="submit" [disabled]="enregistrement">Enregistrer</button></footer>
+  </form>
+</app-form-modal>

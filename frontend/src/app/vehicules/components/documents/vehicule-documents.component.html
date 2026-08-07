@@ -1,0 +1,55 @@
+<section class="tab-panel">
+  <div class="section-toolbar">
+    <h3>Pièces jointes</h3>
+    @if (!lectureSeule) {
+      <button class="btn btn-primary btn-compact" type="button" (click)="ouvrir()">Ajouter</button>
+    }
+  </div>
+  @if (vehicule.piecesJointes.length) {
+    <div class="document-list">
+      @for (piece of vehicule.piecesJointes; track piece) {
+        <article>
+          <div><strong>{{ libellePiece(piece.typePiece) }}</strong><span>{{ piece.nomFichier }} · {{ piece.taille / 1024 | number:'1.0-0':'fr' }} Ko</span></div>
+          <div><button class="text-action" type="button" (click)="telecharger(piece)">Télécharger</button>@if (!lectureSeule) {
+          <button class="text-action danger" type="button" (click)="pieceASupprimer = piece">Supprimer</button>
+        }</div>
+      </article>
+    }
+  </div>
+} @else {
+  <div class="empty-detail">Aucune pièce jointe.</div>
+}
+</section>
+
+<app-form-modal [open]="modalOuverte" eyebrow="Documents" title="Ajouter une pièce jointe" (closed)="modalOuverte = false">
+  <form [formGroup]="form" (ngSubmit)="enregistrer()">
+    <div class="form-grid">
+      <app-form-field class="full-width" label="Type de pièce" controlId="typePiece" [required]="true"><select class="form-control" id="typePiece" [formControl]="form.controls.typePiece"><option value="CARTE_GRISE">Carte grise</option><option value="ASSURANCE">Assurance</option><option value="VISITE_TECHNIQUE">Visite technique</option><option value="VIGNETTE">Vignette</option><option value="AUTRE">Autre</option></select></app-form-field>
+      <app-form-field class="full-width" label="Fichier" controlId="fichierPiece" [required]="true"
+        help="PDF, JPEG ou PNG — 5 Mo maximum.">
+        <label class="attachment-picker" for="fichierPiece">
+          <input #fichierInput id="fichierPiece" type="file"
+            accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+            (change)="choisirFichier($event)">
+          <span class="attachment-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="18" height="18">
+              <path fill="currentColor" d="M16.5 6.5v10a4.5 4.5 0 0 1-9 0V5a3 3 0 0 1 6 0v10.5a1.5 1.5 0 0 1-3 0V6h2v9.5a.5.5 0 0 0 1 0V5a2 2 0 0 0-4 0v11.5a2.5 2.5 0 0 0 5 0v-10h2Z"/>
+            </svg>
+          </span>
+          <span class="attachment-copy">
+            <strong>{{ fichier?.name || 'Sélectionner un document' }}</strong>
+            <small>{{ fichier ? ((fichier.size / 1024 | number:'1.0-0':'fr') + ' Ko sélectionné') : 'Choisissez un fichier depuis votre appareil' }}</small>
+          </span>
+          <span class="attachment-action">{{ fichier ? 'Remplacer' : 'Parcourir' }}</span>
+        </label>
+      </app-form-field>
+    </div>
+    <footer><button class="btn btn-secondary" type="button" (click)="modalOuverte = false">Annuler</button><button class="btn btn-primary" type="submit" [disabled]="enregistrement">Ajouter</button></footer>
+  </form>
+</app-form-modal>
+
+<app-confirm-dialog
+  [open]="!!pieceASupprimer" [destructive]="true" title="Supprimer la pièce jointe"
+  [message]="'La pièce « ' + (pieceASupprimer?.nomFichier || '') + ' » sera définitivement supprimée. Le véhicule et son historique sont conservés.'"
+  confirmLabel="Supprimer" (cancelled)="pieceASupprimer = null" (confirmed)="supprimer()">
+</app-confirm-dialog>

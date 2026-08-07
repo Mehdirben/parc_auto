@@ -1,0 +1,31 @@
+@if (open) {
+  <div class="app-detail-backdrop" (click)="closed.emit()">
+    <section
+      class="app-detail-modal"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-label]="ariaLabel"
+      (click)="$event.stopPropagation()">
+      @if (loading) {
+        <div class="app-detail-loading">
+          <span class="app-detail-spinner"></span>
+          <p>{{ loadingText }}</p>
+        </div>
+      } @else {
+        <header class="app-detail-header">
+          <div>
+            @if (eyebrow) {
+              <span>{{ eyebrow }}</span>
+            }
+            <h2>{{ title }}</h2>
+            @if (code) {
+              <small>{{ code }}</small>
+            }
+          </div>
+          <button type="button" aria-label="Fermer" (click)="closed.emit()">×</button>
+        </header>
+        <div class="app-detail-content"><ng-content></ng-content></div>
+      }
+    </section>
+  </div>
+}

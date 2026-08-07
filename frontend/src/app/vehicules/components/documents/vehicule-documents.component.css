@@ -1,0 +1,62 @@
+.attachment-picker {
+  display: flex;
+  min-height: 58px;
+  padding: 9px 10px;
+  align-items: center;
+  gap: 10px;
+  overflow: hidden;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+.attachment-picker:hover { background: var(--color-surface-muted); border-color: var(--color-primary-500); }
+.attachment-picker:focus-within {
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 3px rgba(40, 125, 110, .1);
+}
+.attachment-picker input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  opacity: 0;
+}
+.attachment-icon {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  place-items: center;
+  color: var(--color-primary-700);
+  background: var(--color-primary-50);
+  border-radius: var(--radius-sm);
+}
+.attachment-copy { display: flex; min-width: 0; flex: 1; flex-direction: column; gap: 3px; }
+.attachment-copy strong {
+  overflow: hidden;
+  color: var(--color-text);
+  font-size: .7rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.attachment-copy small { color: var(--color-muted); font-size: .62rem; }
+.attachment-action {
+  flex: 0 0 auto;
+  padding: 7px 9px;
+  color: var(--color-primary-700);
+  font-size: .65rem;
+  font-weight: 750;
+  background: var(--color-primary-50);
+  border: 1px solid var(--color-primary-100);
+  border-radius: 6px;
+}
+
+@media (max-width: 520px) {
+  .attachment-picker { align-items: flex-start; flex-wrap: wrap; }
+  .attachment-copy { padding-top: 2px; }
+  .attachment-action { margin-left: 44px; }
+}

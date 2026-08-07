@@ -5,18 +5,26 @@
   display: grid;
   min-height: 100vh;
   grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
-  transition: grid-template-columns .22s ease;
+  transition: grid-template-columns .28s cubic-bezier(.4, 0, .2, 1);
 }
 
 .app-layout.sidebar-collapsed { --sidebar-width: 82px; }
 .main-column { min-width: 0; }
 .app-content { width: min(100%, 1480px); margin: 0 auto; padding: 30px; }
 .mobile-backdrop { display: none; }
+.mobile-menu-button { display: none; }
 
 @media (max-width: 1024px) {
   .app-layout { display: block; }
   .mobile-backdrop { position: fixed; inset: 0; z-index: 250; display: block; visibility: hidden; background: rgba(15,23,42,.45); opacity: 0; transition: opacity .2s, visibility .2s; }
   .mobile-backdrop.visible { visibility: visible; opacity: 1; }
+  .mobile-menu-button { position: fixed; top: 14px; left: 16px; z-index: 220; display: grid; width: 42px; height: 42px; place-items: center; color: var(--color-primary-700); background: rgba(255,255,255,.96); border: 1px solid var(--color-border); border-radius: 10px; box-shadow: var(--shadow-md); cursor: pointer; }
+  .mobile-menu-button:focus-visible { outline: 3px solid rgba(40,125,110,.2); outline-offset: 2px; }
+  .app-content { padding-top: 76px; }
 }
 
-@media (max-width: 700px) { .app-content { padding: 22px 16px; } }
+@media (max-width: 700px) { .app-content { padding: 72px 16px 22px; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .app-layout { transition: none; }
+}

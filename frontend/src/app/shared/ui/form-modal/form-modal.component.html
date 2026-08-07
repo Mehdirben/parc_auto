@@ -1,15 +1,20 @@
-<div class="app-modal-backdrop" *ngIf="open" (click)="closed.emit()">
-  <section
-    class="app-form-modal"
-    [class.small]="size === 'small'"
-    role="dialog"
-    aria-modal="true"
-    [attr.aria-label]="title"
-    (click)="$event.stopPropagation()">
-    <header>
-      <div><span *ngIf="eyebrow">{{ eyebrow }}</span><h2>{{ title }}</h2></div>
-      <button type="button" aria-label="Fermer" (click)="closed.emit()">×</button>
-    </header>
-    <ng-content></ng-content>
-  </section>
-</div>
+@if (open) {
+  <div class="app-modal-backdrop" (click)="closed.emit()">
+    <section
+      class="app-form-modal"
+      [class.small]="size === 'small'"
+      [class.large]="size === 'large'"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-label]="title"
+      (click)="$event.stopPropagation()">
+      <header>
+        <div>@if (eyebrow) {
+          <span>{{ eyebrow }}</span>
+          }<h2>{{ title }}</h2></div>
+          <button type="button" aria-label="Fermer" (click)="closed.emit()">×</button>
+        </header>
+        <ng-content></ng-content>
+      </section>
+    </div>
+  }

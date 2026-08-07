@@ -1,0 +1,58 @@
+<section class="panel recent-panel" aria-labelledby="recent-assignments-title">
+  <header class="panel-header">
+    <div>
+      <span class="section-kicker">Mouvements en cours</span>
+      <h2 id="recent-assignments-title">Affectations actives récentes</h2>
+    </div>
+    <a class="panel-link" routerLink="/affectations">Voir toutes les affectations</a>
+  </header>
+
+  @if (loading) {
+    <div class="recent-loading">
+      @for (placeholder of [1, 2, 3]; track placeholder) {
+        <div class="recent-placeholder skeleton"></div>
+      }
+    </div>
+  } @else if (assignments.length === 0) {
+    <div class="recent-empty">
+      <strong>Aucune affectation active</strong>
+      <span>Les nouveaux mouvements de véhicules apparaîtront ici.</span>
+    </div>
+  } @else {
+    <div class="table-shell">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Véhicule</th>
+            <th>Service ou parc</th>
+            <th>Conducteur</th>
+            <th>Date d’effet</th>
+            <th>Mission</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (assignment of assignments; track assignment.id) {
+            <tr>
+              <td>
+                <strong>{{ assignment.immatriculation }}</strong>
+                <small>{{ assignment.marqueModele }}</small>
+              </td>
+              <td>{{ assignment.serviceParcLibelle }}</td>
+              <td>{{ assignment.conducteurNom }}</td>
+              <td>{{ assignment.dateDebut | date:'dd/MM/yyyy' }}</td>
+              <td>
+                @if (assignment.ordreMissionDisponible) {
+                  <span class="status-badge warning">
+                    {{ assignment.typeMission || 'Mission' }}
+                  </span>
+                } @else {
+                  <span class="muted-value">Aucune</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

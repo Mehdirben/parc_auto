@@ -1,0 +1,17 @@
+.mission-backdrop { position: fixed; z-index: 1100; inset: 0; display: grid; padding: 24px; place-items: center; background: rgba(9,39,33,.58); backdrop-filter: blur(3px); }
+.mission-modal { display: flex; width: min(1000px, 96vw); height: min(880px, 94vh); overflow: hidden; flex-direction: column; background: #fff; border-radius: var(--radius-lg); box-shadow: var(--shadow-xl); }
+.mission-modal > header { display: flex; padding: 17px 22px; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--color-border); }
+.mission-modal header span { color: var(--color-primary-600); font-size: .62rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.mission-modal header h2 { margin: 2px 0; color: var(--color-ink); font-size: 1.15rem; }
+.mission-modal header small { color: var(--color-muted); font-family: monospace; }
+.mission-modal header button { width: 34px; height: 34px; color: var(--color-muted); font-size: 1.5rem; background: var(--color-surface-muted); border: 0; border-radius: 50%; cursor: pointer; }
+.mission-preview { min-height: 0; overflow: hidden; flex: 1; background: #e8eeec; }
+.mission-modal > footer { display: flex; padding: 14px 22px; align-items: center; justify-content: space-between; gap: 18px; border-top: 1px solid var(--color-border); }
+.mission-modal footer p { color: var(--color-muted); font-size: .67rem; }
+.mission-modal footer div { display: flex; gap: 8px; }
+@media (max-width: 650px) {
+  .mission-backdrop { padding: 0; }
+  .mission-modal { width: 100vw; height: 100vh; border-radius: 0; }
+  .mission-modal > footer { align-items: stretch; flex-direction: column; }
+  .mission-modal footer div { justify-content: flex-end; }
+}

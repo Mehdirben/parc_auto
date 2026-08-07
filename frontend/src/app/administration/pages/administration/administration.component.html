@@ -1,0 +1,204 @@
+<app-page-header
+  eyebrow="Sécurité et traçabilité"
+  title="Administration"
+  description="Gérez les habilitations Keycloak et consultez le journal des opérations.">
+</app-page-header>
+
+<nav class="tabs" aria-label="Sections d’administration">
+  <button type="button" [class.active]="onglet === 'utilisateurs'" (click)="changerOnglet('utilisateurs')">Utilisateurs Keycloak</button>
+  <button type="button" [class.active]="onglet === 'permissions'" (click)="changerOnglet('permissions')">Rôles et permissions</button>
+  <button type="button" [class.active]="onglet === 'journal'" (click)="changerOnglet('journal')">Journal d’audit</button>
+</nav>
+
+@if (erreur) {
+  <p class="alert">{{ erreur }}</p>
+}
+
+@if (onglet === 'utilisateurs') {
+  <section class="panel" [attr.aria-busy]="chargement">
+    <div class="panel-header">
+      <div><h2>Utilisateurs du realm</h2><p>Activation et rôle applicatif unique.</p></div>
+      <div class="user-header-actions">
+        <form class="filters" (ngSubmit)="chargerUtilisateurs()">
+          <input class="form-control" name="rechercheUtilisateur" [(ngModel)]="rechercheUtilisateur"
+            placeholder="Nom, identifiant ou e-mail">
+          <button class="btn btn-secondary" type="submit">Rechercher</button>
+        </form>
+        <button class="btn btn-primary" type="button" (click)="ouvrirCreation()">+ Nouvel utilisateur</button>
+      </div>
+    </div>
+    @if (utilisateurs) {
+      <div class="table-shell">
+        <table class="data-table">
+          <thead><tr><th>Utilisateur</th><th>E-mail</th><th>Rôle</th><th>Statut</th><th>Action</th></tr></thead>
+          <tbody>
+            @for (user of utilisateurs.contenu; track user) {
+              <tr>
+                <td><strong>{{ nomComplet(user) }}</strong><small>{{ user.nomUtilisateur }}</small></td>
+                <td>{{ user.email || '—' }}</td>
+                <td><span class="role-badge">{{ role(user) }}</span></td>
+                <td><span class="status-badge" [class.success]="user.actif" [class.neutral]="!user.actif">{{ user.actif ? 'Actif' : 'Inactif' }}</span></td>
+                <td class="actions">
+                  <button class="btn btn-secondary btn-compact" type="button"
+                    [disabled]="modificationId === user.id"
+                  (click)="ouvrirModification(user)">Modifier</button>
+                  <button class="btn btn-compact" [class.btn-danger]="user.actif" [class.btn-secondary]="!user.actif"
+                    type="button" [disabled]="modificationId === user.id"
+                  (click)="changerStatut(user)">{{ user.actif ? 'Désactiver' : 'Activer' }}</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+    @if (chargement && !utilisateurs) {
+      <app-table-loading columns="1fr 1fr 120px 100px"></app-table-loading>
+    }
+    @if (utilisateurs) {
+      <app-pagination [page]="utilisateurs.page" [pageSize]="utilisateurs.taille"
+        [totalItems]="utilisateurs.totalElements" [totalPages]="utilisateurs.totalPages"
+        [first]="utilisateurs.premiere" [last]="utilisateurs.derniere" [disabled]="chargement"
+      (pageChange)="chargerUtilisateurs($event)"></app-pagination>
+    }
+  </section>
+}
+
+@if (onglet === 'permissions') {
+  <section class="panel">
+    <div class="panel-header"><div><h2>Matrice des habilitations</h2><p>Les droits sont appliqués côté interface et contrôlés par l’API.</p></div></div>
+    <div class="table-shell">
+      <table class="data-table permission-table">
+        <thead><tr><th>Fonction</th><th>Administrateur</th><th>Gestionnaire</th><th>Consultation</th></tr></thead>
+        <tbody>@for (ligne of matrice; track ligne) {
+          <tr>
+            <td>{{ ligne.fonction }}</td>
+            <td>{{ ligne.admin ? '✓' : '—' }}</td><td>{{ ligne.gestionnaire ? '✓' : '—' }}</td><td>{{ ligne.consultation ? '✓' : '—' }}</td>
+          </tr>
+        }</tbody>
+      </table>
+    </div>
+  </section>
+}
+
+@if (onglet === 'journal') {
+  <section class="panel" [attr.aria-busy]="chargement">
+    <div class="panel-header audit-header">
+      <div><h2>Journal des opérations</h2><p>Créations, modifications, désactivations, imports et documents.</p></div>
+      <form class="filters audit-filters" (ngSubmit)="chargerJournal()">
+        <input class="form-control" name="rechercheJournal" [(ngModel)]="rechercheJournal"
+          placeholder="Utilisateur ou référence">
+        <select class="form-control" name="action" [(ngModel)]="action"
+          aria-label="Filtrer par opération">
+          <option value="">Toutes les opérations</option>
+          @for (option of actionsAudit; track option) {
+            <option [value]="option.valeur">
+              {{ option.libelle }}
+            </option>
+          }
+        </select>
+        <select class="form-control" name="entite" [(ngModel)]="entite"
+          aria-label="Filtrer par élément">
+          <option value="">Tous les éléments</option>
+          @for (option of entitesAudit; track option) {
+            <option [value]="option.valeur">
+              {{ option.libelle }}
+            </option>
+          }
+        </select>
+        <button class="btn btn-secondary" type="submit">Filtrer</button>
+      </form>
+    </div>
+    @if (journal) {
+      <div class="table-shell">
+        <table class="data-table audit-table">
+          <thead><tr><th>Date et heure</th><th>Effectuée par</th><th>Opération</th><th>Élément concerné</th><th>Statut</th><th></th></tr></thead>
+          <tbody>@for (item of journal.contenu; track item) {
+            <tr>
+              <td>{{ item.dateAction | date:'dd/MM/yyyy à HH:mm' }}</td>
+              <td><strong>{{ item.utilisateur || 'Système automatique' }}</strong></td>
+              <td><span class="action-badge">{{ libelleActionAudit(item.action) }}</span></td>
+              <td>
+                <strong>{{ libelleEntiteAudit(item.entite) }}</strong>
+                <small [title]="item.entiteId">{{ referenceAudit(item.entiteId) }}</small>
+              </td>
+              <td>
+                <span class="status-badge" [class.success]="item.resultat === 'SUCCES'"
+                  [class.danger]="item.resultat !== 'SUCCES'">
+                  {{ item.resultat === 'SUCCES' ? 'Réussie' : 'Échec' }}
+                </span>
+              </td>
+              <td><button class="btn btn-secondary btn-compact" type="button"
+              (click)="ouvrirDetailAudit(item)">Voir le détail</button></td>
+            </tr>
+          }</tbody>
+        </table>
+      </div>
+    }
+    @if (chargement && !journal) {
+      <app-table-loading columns="130px 1fr 120px 1fr"></app-table-loading>
+    }
+    @if (journal) {
+      <app-pagination [page]="journal.page" [pageSize]="journal.taille"
+        [totalItems]="journal.totalElements" [totalPages]="journal.totalPages"
+        [first]="journal.premiere" [last]="journal.derniere" [disabled]="chargement"
+      (pageChange)="chargerJournal($event)"></app-pagination>
+    }
+  </section>
+}
+
+<app-utilisateur-dialog
+  [open]="utilisateurDialogueOuvert"
+  [mode]="utilisateurModifie ? 'administration' : 'creation'"
+  [utilisateur]="utilisateurModifie"
+  [chargement]="!!modificationId"
+  [erreur]="utilisateurDialogueOuvert ? erreur : ''"
+  (closed)="utilisateurDialogueOuvert = false; erreur = ''"
+  (submitted)="enregistrerUtilisateur($event)">
+</app-utilisateur-dialog>
+
+@if (detailAudit) {
+  <div class="modal-backdrop" (click)="detailAudit = undefined">
+    <article class="audit-detail" (click)="$event.stopPropagation()">
+      <header>
+        <div>
+          <small>Détail de l’opération</small>
+          <h2>{{ libelleActionAudit(detailAudit.action) }}</h2>
+          <p>{{ libelleEntiteAudit(detailAudit.entite) }}</p>
+        </div>
+        <button type="button" aria-label="Fermer" (click)="detailAudit = undefined">×</button>
+      </header>
+      <dl class="audit-summary">
+        <div><dt>Date et heure</dt><dd>{{ detailAudit.dateAction | date:'dd/MM/yyyy à HH:mm:ss' }}</dd></div>
+        <div><dt>Effectuée par</dt><dd>{{ detailAudit.utilisateur || 'Système automatique' }}</dd></div>
+        <div><dt>Résultat</dt><dd>{{ detailAudit.resultat === 'SUCCES' ? 'Opération réussie' : 'Opération en échec' }}</dd></div>
+        <div><dt>Référence</dt><dd [title]="detailAudit.entiteId">{{ referenceAudit(detailAudit.entiteId) }}</dd></div>
+      </dl>
+      @if (detailValeurs.length) {
+        <section class="changes-section">
+          <h3>Informations de l’opération</h3>
+          <div class="changes-table">
+            <div class="changes-head"><span>Information</span><span>Avant</span><span>Après</span></div>
+            @for (valeur of detailValeurs; track valeur) {
+              <div class="change-row"
+                [class.changed]="valeur.modifiee">
+                <strong>{{ valeur.libelle }}</strong>
+                <span>{{ valeur.avant }}</span>
+                <span>{{ valeur.apres }}</span>
+              </div>
+            }
+          </div>
+        </section>
+      } @else {
+        <p class="no-values">Cette opération ne modifie aucune information enregistrée.</p>
+      }
+      <details class="technical-details">
+        <summary>Informations techniques</summary>
+        <dl>
+          <div><dt>Identifiant complet</dt><dd>{{ detailAudit.entiteId }}</dd></div>
+          <div><dt>Adresse réseau</dt><dd>{{ detailAudit.adresseIp }}</dd></div>
+        </dl>
+      </details>
+    </article>
+  </div>
+}

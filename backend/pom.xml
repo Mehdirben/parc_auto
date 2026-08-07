@@ -10,11 +10,11 @@
     <relativePath/>
   </parent>
 
-  <groupId>ma.gov.mesrsi</groupId>
+  <groupId>com.parcautomobile</groupId>
   <artifactId>parc-automobile-api</artifactId>
   <version>0.1.0-SNAPSHOT</version>
   <name>Parc Automobile API</name>
-  <description>API métier de gestion du parc automobile du MESRSI</description>
+  <description>API métier de gestion d'un parc automobile</description>
 
   <properties>
     <java.version>21</java.version>
@@ -55,22 +55,27 @@
       <artifactId>flyway-sqlserver</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.apache.poi</groupId>
+      <artifactId>poi-ooxml</artifactId>
+      <version>5.4.1</version>
+    </dependency>
+    <dependency>
+      <groupId>com.openhtmltopdf</groupId>
+      <artifactId>openhtmltopdf-pdfbox</artifactId>
+      <version>1.0.10</version>
+    </dependency>
+    <dependency>
+      <groupId>com.openhtmltopdf</groupId>
+      <artifactId>openhtmltopdf-rtl-support</artifactId>
+      <version>1.0.10</version>
+    </dependency>
+    <dependency>
       <groupId>com.microsoft.sqlserver</groupId>
       <artifactId>mssql-jdbc</artifactId>
       <version>${mssql-jdbc.version}</version>
       <scope>runtime</scope>
     </dependency>
 
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-test</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.security</groupId>
-      <artifactId>spring-security-test</artifactId>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 
   <build>

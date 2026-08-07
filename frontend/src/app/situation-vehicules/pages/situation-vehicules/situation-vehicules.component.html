@@ -1,0 +1,133 @@
+<app-page-header
+  eyebrow="Parc automobile"
+  title="Situation du parc"
+  description="Vue consolidée des données administratives, techniques et d’affectation des véhicules.">
+  @if (permissions.peutModifier) {
+    <button class="btn btn-secondary" type="button" (click)="exporter()" [disabled]="exportEnCours">
+      <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true">
+        <path fill="currentColor" d="M19 9h-4V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V11l-2-2Zm-6-4.5L19.5 11H13V4.5ZM11 12h2v4h2l-3 3-3-3h2v-4Z"/>
+      </svg>
+      {{ exportEnCours ? 'Export…' : 'Exporter SIT.xlsx' }}
+    </button>
+    <button class="btn btn-primary" type="button" (click)="importOuvert = true">
+      <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true">
+        <path fill="currentColor" d="M19 9h-4V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V11l-2-2Zm-6-4.5L19.5 11H13V4.5ZM11 19v-4H9l3-3 3 3h-2v4h-2Z"/>
+      </svg>
+      Importer Excel
+    </button>
+  }
+</app-page-header>
+
+<section class="panel list-panel situation-panel" [attr.aria-busy]="chargement">
+  <app-search-toolbar
+    [control]="recherche"
+    placeholder="Rechercher par immatriculation, VIN, marque ou type…"
+    ariaLabel="Rechercher dans la situation du parc"
+    (refreshed)="charger()">
+    <select class="filter-select" [formControl]="statutFiltre" aria-label="Filtrer par statut">
+      <option value="">Tous les statuts</option>
+      <option value="DISPONIBLE">Disponible</option>
+      <option value="AFFECTE">Affecté</option>
+      <option value="IMMOBILISE">Immobilisé</option>
+      <option value="EN_MAINTENANCE">En maintenance</option>
+      <option value="REFORME">Réformé</option>
+      <option value="INACTIF">Inactif</option>
+    </select>
+    <select class="filter-select" [formControl]="genreFiltre" aria-label="Filtrer par genre">
+      <option value="">Tous les genres</option>
+      <option value="VOITURE_TOURISME">Voiture de tourisme</option>
+      <option value="FOURGONNETTE_VITREE">Fourgonnette vitrée</option>
+      <option value="FOURGONNETTE">Fourgonnette</option>
+      <option value="MINIBUS">Minibus</option>
+      <option value="UTILITAIRE">Utilitaire</option>
+      <option value="CYCLOMOTEUR">Cyclomoteur</option>
+    </select>
+    <select class="filter-select" [formControl]="carburantFiltre" aria-label="Filtrer par carburant">
+      <option value="">Tous les carburants</option>
+      <option value="DIESEL">Diesel</option>
+      <option value="ESSENCE">Essence</option>
+      <option value="HYBRIDE">Hybride</option>
+      <option value="ELECTRIQUE">Électrique</option>
+      <option value="MELANGE">Mélange</option>
+    </select>
+  </app-search-toolbar>
+
+  @if (!chargement && !erreur) {
+    <div class="table-caption">
+      <strong>{{ page.totalElements | number:'1.0-0':'fr' }}</strong>
+      véhicule{{ page.totalElements > 1 ? 's' : '' }} dans la situation consolidée
+    </div>
+  }
+
+  @if (page.contenu.length) {
+    <app-data-table>
+      <table class="data-table situation-table">
+        <thead>
+          <tr>
+            <th>N°</th><th>Matricule</th><th>Marque</th><th>Type</th><th>Genre</th>
+            <th>N° de VIN</th><th>Carburant</th><th>Puissance fiscale</th>
+            <th>Poids total en charge</th><th>Date de mise en circulation</th>
+            <th>Affectation</th><th>Conducteur</th><th>Kilométrage</th><th>Observation</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (vehicule of page.contenu; track identifier($index, vehicule)) {
+            <tr>
+              <td>{{ vehicule.numero }}</td>
+              <td><span class="registration">{{ vehicule.immatriculation }}</span></td>
+              <td><strong>{{ vehicule.marque }}</strong></td>
+              <td>{{ vehicule.type }}</td>
+              <td>{{ libelleGenre(vehicule.genre) }}</td>
+              <td><span class="vin">{{ vehicule.vin }}</span></td>
+              <td>{{ libelleCarburant(vehicule.carburant) }}</td>
+              <td>{{ vehicule.puissanceFiscale ? (vehicule.puissanceFiscale + ' CV') : '—' }}</td>
+              <td>{{ vehicule.poidsTotalCharge ? ((vehicule.poidsTotalCharge | number:'1.0-2':'fr') + ' kg') : '—' }}</td>
+              <td>{{ vehicule.dateMiseEnCirculation ? (vehicule.dateMiseEnCirculation | date:'dd/MM/yyyy') : '—' }}</td>
+              <td>{{ vehicule.affectation || 'Au parc' }}</td>
+              <td>{{ vehicule.conducteur || '—' }}</td>
+              <td><strong>{{ vehicule.kilometrage | number:'1.0-0':'fr' }} km</strong></td>
+              <td>
+                <span class="status-badge"
+                  [class.success]="vehicule.observation === 'BON_ETAT'"
+                  [class.warning]="vehicule.observation === 'ETAT_MOYEN'"
+                  [class.danger]="vehicule.observation === 'MAUVAIS_ETAT'">
+                  {{ libelleEtat(vehicule.observation) }}
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </app-data-table>
+  }
+
+  @if (chargement && !page.contenu.length) {
+    <app-table-loading></app-table-loading>
+  }
+  @if (!chargement && !page.contenu.length && !erreur) {
+    <app-empty-state
+      title="Aucun véhicule trouvé"
+      description="Aucun véhicule ne correspond aux critères sélectionnés.">
+    </app-empty-state>
+  }
+  @if (!chargement && erreur) {
+    <app-empty-state
+      title="Chargement impossible" [description]="erreur">
+      <button class="btn btn-secondary" type="button" (click)="charger()">Réessayer</button>
+    </app-empty-state>
+  }
+  @if (page.contenu.length && !erreur) {
+    <app-pagination
+      [page]="page.page" [pageSize]="page.taille"
+      [totalItems]="page.totalElements" [totalPages]="page.totalPages"
+      [first]="page.premiere" [last]="page.derniere" [disabled]="chargement"
+      (pageChange)="charger($event)">
+    </app-pagination>
+  }
+</section>
+
+<app-import-situation-modal
+  [open]="importOuvert"
+  (closed)="importOuvert = false"
+  (imported)="apresImport()">
+</app-import-situation-modal>

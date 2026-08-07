@@ -1,8 +1,10 @@
-<footer class="crud-pagination" *ngIf="totalItems">
-  <span>Affichage {{ start }}–{{ end }} sur {{ totalItems }}</span>
-  <div>
-    <button type="button" [disabled]="first" (click)="pageChange.emit(page - 1)" aria-label="Page précédente">‹</button>
-    <strong>Page {{ page + 1 }} sur {{ totalPages }}</strong>
-    <button type="button" [disabled]="last" (click)="pageChange.emit(page + 1)" aria-label="Page suivante">›</button>
-  </div>
-</footer>
+@if (totalItems) {
+  <footer class="crud-pagination">
+    <span>Affichage {{ start }}–{{ end }} sur {{ totalItems }}</span>
+    <div>
+      <button type="button" [disabled]="disabled || first" (click)="pageChange.emit(page - 1)" aria-label="Page précédente">‹</button>
+      <strong>Page {{ page + 1 }} sur {{ totalPages }}</strong>
+      <button type="button" [disabled]="disabled || last" (click)="pageChange.emit(page + 1)" aria-label="Page suivante">›</button>
+    </div>
+  </footer>
+}

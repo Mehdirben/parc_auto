@@ -1,0 +1,190 @@
+<app-page-header
+  eyebrow="Référentiels"
+  title="Marques"
+  description="Administrez les constructeurs automobiles disponibles dans le parc.">
+  @if (permissions.peutModifier) {
+    <button class="btn btn-primary" type="button" (click)="ouvrirCreation()">
+      <svg viewBox="0 0 24 24" width="17" height="17"><path fill="currentColor" d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5Z"/></svg>
+      Ajouter une marque
+    </button>
+  }
+</app-page-header>
+
+<section class="summary-grid">
+  <app-summary-card [value]="page.totalElements" label="Marques enregistrées" [icon]="marquesIcon"></app-summary-card>
+  <app-summary-card [value]="statistiques.totalModeles" label="Modèles enregistrés" [icon]="modelesIcon" tone="gold"></app-summary-card>
+</section>
+
+<section class="panel list-panel" [attr.aria-busy]="chargement">
+  <app-search-toolbar
+    [control]="recherche"
+    placeholder="Rechercher une marque…"
+    ariaLabel="Rechercher une marque"
+    (refreshed)="charger()">
+  </app-search-toolbar>
+
+  @if (page.contenu.length) {
+    <app-data-table>
+      <table class="data-table">
+        <thead><tr><th>Code</th><th>Désignation</th><th>Modèles</th><th>Création</th><th class="actions-column">Actions</th></tr></thead>
+        <tbody>
+          @for (marque of page.contenu; track identifierMarque($index, marque)) {
+            <tr>
+              <td><span class="code-chip">{{ marque.code }}</span></td>
+              <td><button class="brand-link" type="button" (click)="consulter(marque)">{{ marque.designation }}</button></td>
+              <td><span class="model-count">{{ marque.nombreModeles }} modèle{{ marque.nombreModeles > 1 ? 's' : '' }}</span></td>
+              <td><div class="audit-cell"><span>{{ marque.dateCreation | date:'dd/MM/yyyy' }}</span><small>par {{ marque.creePar }}</small></div></td>
+              <td class="actions-cell">
+                <app-table-action kind="view" (triggered)="consulter(marque)"></app-table-action>
+                @if (permissions.peutModifier) {
+                  <app-table-action kind="edit" (triggered)="ouvrirModification(marque)"></app-table-action>
+                }
+                @if (permissions.peutModifier) {
+                  <app-table-action kind="delete" (triggered)="demanderSuppressionMarque(marque)"></app-table-action>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </app-data-table>
+  }
+
+  @if (chargement && !page.contenu.length) {
+    <app-table-loading></app-table-loading>
+  }
+
+  @if (!chargement && !page.contenu.length && !erreur) {
+    <app-empty-state title="Aucune marque trouvée" [description]="recherche.value ? 'Aucun résultat ne correspond à votre recherche.' : 'Commencez par ajouter la première marque du référentiel.'">
+      @if (permissions.peutModifier && !recherche.value) {
+        <button class="btn btn-primary" type="button" (click)="ouvrirCreation()">Ajouter une marque</button>
+      }
+    </app-empty-state>
+  }
+
+  @if (!chargement && erreur) {
+    <app-empty-state title="Chargement impossible" [description]="erreur">
+      <button class="btn btn-secondary" type="button" (click)="charger()">Réessayer</button>
+    </app-empty-state>
+  }
+
+  @if (page.contenu.length) {
+    <app-pagination
+      [page]="page.page"
+      [pageSize]="page.taille"
+      [totalItems]="page.totalElements"
+      [totalPages]="page.totalPages"
+      [first]="page.premiere"
+      [last]="page.derniere"
+      [disabled]="chargement"
+      (pageChange)="charger($event)">
+    </app-pagination>
+  }
+</section>
+
+<app-detail-modal
+  [open]="chargementDetail || !!selection"
+  [loading]="chargementDetail"
+  loadingText="Chargement de la marque…"
+  eyebrow="Fiche marque"
+  [title]="selection?.designation || ''"
+  [code]="selection?.code || ''"
+  ariaLabel="Détail de la marque"
+  (closed)="fermerDetail()">
+  @if (selection; as marque) {
+    <section class="detail-section">
+      <div class="section-title"><div><span>Modèles rattachés</span><strong>{{ marque.modeles.length }}</strong></div>@if (permissions.peutModifier) {
+      <button class="btn btn-primary btn-compact" type="button" (click)="ouvrirAjoutModele()">+ Ajouter</button>
+    }</div>
+    @if (marque.modeles.length) {
+      <div class="models-list">
+        @for (modele of marque.modeles; track identifierModele($index, modele)) {
+          <article>
+            <span class="model-avatar">{{ modele.nom.slice(0, 2).toUpperCase() }}</span>
+            <strong>{{ modele.nom }}</strong>
+            <app-table-action kind="view" label="Consulter l’historique du modèle" (triggered)="consulterModele(modele)"></app-table-action>
+            @if (permissions.peutModifier) {
+              <app-table-action kind="edit" label="Modifier le modèle" (triggered)="ouvrirModificationModele(modele)"></app-table-action>
+            }
+            @if (permissions.peutModifier) {
+              <app-table-action kind="delete" label="Supprimer le modèle" (triggered)="demanderSuppressionModele(modele)"></app-table-action>
+            }
+          </article>
+        }
+      </div>
+    } @else {
+      <div class="no-models"><p>Aucun modèle rattaché à cette marque.</p>@if (permissions.peutModifier) {
+      <button class="btn btn-secondary btn-compact" type="button" (click)="ouvrirAjoutModele()">Ajouter des modèles</button>
+    }</div>
+  }
+</section>
+<app-audit-trail [createdAt]="marque.dateCreation" [createdBy]="marque.creePar" [updatedAt]="marque.dateModification" [updatedBy]="marque.modifiePar || ''"></app-audit-trail>
+<app-activity-timeline title="Historique de la marque" [items]="historiqueMarque"></app-activity-timeline>
+}
+</app-detail-modal>
+
+<app-detail-modal
+  [open]="chargementDetailModele || !!selectionModele"
+  [loading]="chargementDetailModele"
+  loadingText="Chargement du modèle…"
+  eyebrow="Fiche modèle"
+  [title]="selectionModele?.nom || ''"
+  [code]="selectionModele?.marqueCode || ''"
+  ariaLabel="Détail du modèle"
+  (closed)="selectionModele = null">
+  @if (selectionModele; as modele) {
+    <dl class="identity-grid">
+      <div><dt>Marque</dt><dd>{{ modele.marqueDesignation }}</dd></div>
+      <div><dt>Code marque</dt><dd><span class="code-chip">{{ modele.marqueCode }}</span></dd></div>
+    </dl>
+    <app-audit-trail [createdAt]="modele.dateCreation" [createdBy]="modele.creePar" [updatedAt]="modele.dateModification" [updatedBy]="modele.modifiePar || ''"></app-audit-trail>
+    <app-activity-timeline title="Historique du modèle" [items]="historiqueModele"></app-activity-timeline>
+  }
+</app-detail-modal>
+
+<app-form-modal
+  [open]="marqueDialogOuvert"
+  [eyebrow]="marqueDialogMode === 'create' ? 'Nouvelle entrée' : 'Modification'"
+  [title]="marqueDialogMode === 'create' ? 'Ajouter une marque' : 'Modifier la marque'"
+  (closed)="marqueDialogOuvert = false">
+  <form [formGroup]="marqueForm" (ngSubmit)="enregistrerMarque()">
+    <app-form-field label="Désignation" controlId="designation" [required]="true" [error]="marqueForm.controls.designation.touched && marqueForm.controls.designation.invalid ? 'La désignation est obligatoire (80 caractères maximum).' : ''"><input class="form-control" id="designation" [formControl]="marqueForm.controls.designation" maxlength="80" placeholder="Ex. Renault"></app-form-field>
+    @if (marqueDialogMode === 'create') {
+      <app-toggle-field [control]="marqueForm.controls.ajouterModeles" label="Ajouter des modèles maintenant" help="Vous pourrez aussi les ajouter ultérieurement."></app-toggle-field>
+    }
+    @if (marqueDialogMode === 'create' && marqueForm.controls.ajouterModeles.value) {
+      <app-dynamic-text-list
+        [control]="marqueForm.controls.modeles"
+        title="Modèles"
+        singularLabel="Modèle"
+        firstPlaceholder="Ex. Clio"
+        nextPlaceholder="Autre modèle"
+        requiredMessage="Saisissez au moins un modèle.">
+      </app-dynamic-text-list>
+    }
+    <footer><button class="btn btn-secondary" type="button" (click)="marqueDialogOuvert = false">Annuler</button><button class="btn btn-primary" type="submit" [disabled]="enregistrement">@if (enregistrement) {
+    <span class="button-spinner"></span>
+  }{{ marqueDialogMode === 'create' ? 'Créer la marque' : 'Enregistrer' }}</button></footer>
+</form>
+</app-form-modal>
+
+<app-modele-form-modal
+  [open]="modeleDialogOuvert"
+  [mode]="modeleDialogMode"
+  [saving]="enregistrement"
+  [marqueCode]="selection?.code || ''"
+  [modeleNom]="modeleModifie?.nom || ''"
+  [lockMarque]="true"
+  (closed)="modeleDialogOuvert = false"
+  (submitted)="enregistrerModele($event)">
+</app-modele-form-modal>
+
+<app-confirm-dialog
+  [open]="!!suppression"
+  [destructive]="true"
+  title="Confirmer la suppression"
+  [message]="'Voulez-vous supprimer « ' + (suppression?.libelle || '') + ' » ? Cette action sera refusée si la donnée est utilisée par un véhicule.'"
+  confirmLabel="Supprimer"
+  (cancelled)="suppression = null"
+  (confirmed)="confirmerSuppression()">
+</app-confirm-dialog>

@@ -1,0 +1,23 @@
+.modal-backdrop { position: fixed; z-index: 1000; inset: 0; display: grid; padding: 20px; place-items: center; background: rgba(8, 28, 24, .55); }
+.user-dialog { width: min(640px, 100%); max-height: calc(100vh - 40px); padding: 22px 24px; overflow: auto; background: #fff; border-radius: var(--radius-lg); box-shadow: var(--shadow-xl); }
+.user-dialog header { display: flex; margin-bottom: 18px; align-items: flex-start; justify-content: space-between; }
+.user-dialog header small { color: var(--color-primary-600); font-size: .68rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
+.user-dialog header h2 { margin-top: 5px; color: var(--color-ink); font-size: 1.2rem; }
+.user-dialog header > button { display: grid; width: 32px; height: 32px; padding: 0; place-items: center; color: var(--color-muted); font-size: 1.35rem; line-height: 1; background: transparent; border: 0; border-radius: 8px; cursor: pointer; }
+.user-dialog header > button:hover { color: var(--color-ink); background: var(--color-surface-muted); }
+.user-dialog .form-grid { column-gap: 18px; row-gap: 16px; }
+.user-dialog .form-field { min-width: 0; }
+.user-dialog .form-field small { display: block; min-height: 1em; margin-top: 2px; color: var(--color-muted); font-size: .65rem; line-height: 1.35; }
+.user-dialog .form-control { min-height: 42px; font-size: .8rem; }
+.user-dialog footer { display: flex; margin-top: 20px; justify-content: flex-end; gap: 9px; }
+.active-field { display: flex; grid-column: 1 / -1; align-items: center; gap: 9px; color: var(--color-text); font-size: .75rem; font-weight: 700; cursor: pointer; }
+.active-field input { width: 17px; height: 17px; accent-color: var(--color-primary-600); }
+.dialog-alert { margin-bottom: 16px; padding: 11px 13px; color: var(--color-danger-700); font-size: .72rem; background: var(--color-danger-50); border-radius: var(--radius-sm); }
+.password-control { display: flex; min-height: 42px; padding: 4px 5px 4px 12px; align-items: center; justify-content: space-between; gap: 10px; color: var(--color-muted); letter-spacing: .14em; background: var(--color-surface-muted); border: 1px solid var(--color-border-strong); border-radius: var(--radius-sm); }
+.password-control .btn { min-height: 32px; letter-spacing: normal; }
+@media (max-width: 640px) {
+  .modal-backdrop { padding: 12px; align-items: end; }
+  .user-dialog { width: 100%; max-height: calc(100vh - 24px); padding: 18px; border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+  .user-dialog .form-grid { grid-template-columns: 1fr; }
+  .user-dialog footer { position: sticky; bottom: -18px; margin-right: -18px; margin-bottom: -18px; margin-left: -18px; padding: 14px 18px 18px; background: #fff; border-top: 1px solid var(--color-border); }
+}

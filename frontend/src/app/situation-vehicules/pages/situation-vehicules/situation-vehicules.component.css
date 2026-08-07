@@ -1,0 +1,17 @@
+.situation-panel { overflow: hidden; }
+.table-caption { padding: 10px 20px; color: var(--color-muted); font-size: .69rem; background: var(--color-surface-muted); border-bottom: 1px solid var(--color-border); }
+.table-caption strong { color: var(--color-primary-700); }
+.situation-table { min-width: 1900px; }
+.situation-table th:first-child,
+.situation-table td:first-child { position: sticky; left: 0; z-index: 1; width: 50px; background: var(--color-surface); }
+.situation-table th:first-child { z-index: 2; background: var(--color-surface-muted); }
+.situation-table th:nth-child(2),
+.situation-table td:nth-child(2) { position: sticky; left: 50px; z-index: 1; min-width: 145px; background: var(--color-surface); box-shadow: 5px 0 8px rgba(20, 55, 46, .04); }
+.situation-table th:nth-child(2) { z-index: 2; background: var(--color-surface-muted); }
+.situation-table tbody tr:hover td { background: #fbfdfc; }
+.registration { color: var(--color-primary-700); font-weight: 800; }
+.vin { font-family: monospace; font-size: .72rem; }
+@media (max-width: 700px) {
+  .situation-table th:nth-child(2),
+  .situation-table td:nth-child(2) { position: static; box-shadow: none; }
+}

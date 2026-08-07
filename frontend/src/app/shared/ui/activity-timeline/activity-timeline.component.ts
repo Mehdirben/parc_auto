@@ -9,11 +9,10 @@ export interface ActivityItem {
 }
 
 @Component({
-  selector: 'app-activity-timeline',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './activity-timeline.component.html',
-  styleUrls: ['./activity-timeline.component.css']
+    selector: 'app-activity-timeline',
+    imports: [CommonModule],
+    templateUrl: './activity-timeline.component.html',
+    styleUrls: ['./activity-timeline.component.css']
 })
 export class ActivityTimelineComponent {
   @Input() title = 'Historique des actions';

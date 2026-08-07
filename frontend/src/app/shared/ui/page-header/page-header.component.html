@@ -1,8 +1,12 @@
 <header class="page-header">
   <div class="page-heading">
-    <span class="page-eyebrow" *ngIf="eyebrow">{{ eyebrow }}</span>
+    @if (eyebrow) {
+      <span class="page-eyebrow">{{ eyebrow }}</span>
+    }
     <h1>{{ title }}</h1>
-    <p *ngIf="description">{{ description }}</p>
+    @if (description) {
+      <p>{{ description }}</p>
+    }
   </div>
   <div class="page-actions">
     <ng-content></ng-content>

@@ -1,12 +1,11 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 
 @Component({
-  selector: 'app-session-timeout-modal',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './session-timeout-modal.component.html',
-  styleUrls: ['./session-timeout-modal.component.css']
+    selector: 'app-session-timeout-modal',
+    imports: [],
+    templateUrl: './session-timeout-modal.component.html',
+    styleUrls: ['./session-timeout-modal.component.css']
 })
 export class SessionTimeoutModalComponent {
   @Input() visible = false;

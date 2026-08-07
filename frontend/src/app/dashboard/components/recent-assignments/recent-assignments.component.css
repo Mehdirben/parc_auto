@@ -1,0 +1,13 @@
+:host { display: block; min-width: 0; }
+.recent-panel { overflow: hidden; }
+.panel-header div { min-width: 0; }
+td:first-child strong, td:first-child small { display: block; }
+td:first-child strong { color: var(--color-ink); font-size: .76rem; }
+td:first-child small { margin-top: 2px; color: var(--color-muted); font-size: .62rem; }
+.muted-value { color: var(--color-muted); font-size: .68rem; }
+.recent-loading { padding: 15px 20px 20px; }
+.recent-placeholder { height: 47px; margin-top: 8px; }
+.recent-empty { display: flex; min-height: 170px; padding: 30px; align-items: center; justify-content: center; flex-direction: column; gap: 6px; text-align: center; }
+.recent-empty strong { color: var(--color-ink); font-size: .85rem; }
+.recent-empty span { color: var(--color-muted); font-size: .7rem; }
+@media (max-width: 700px) { .panel-header { align-items: flex-start; flex-direction: column; } }

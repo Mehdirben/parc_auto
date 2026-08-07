@@ -47,7 +47,11 @@ services:
       DB_USERNAME: sa
       DB_PASSWORD: ${MSSQL_SA_PASSWORD:?Set MSSQL_SA_PASSWORD in .env}
       KEYCLOAK_JWK_SET_URI: "http://host.docker.internal:${KEYCLOAK_PORT:-8085}/realms/parc-automobile/protocol/openid-connect/certs"
+      KEYCLOAK_SERVER_BASE_URL: "http://host.docker.internal:${KEYCLOAK_PORT:-8085}"
+      KEYCLOAK_ADMIN_BASE_URL: "http://host.docker.internal:${KEYCLOAK_PORT:-8085}/admin/realms"
+      KEYCLOAK_REALM: "parc-automobile"
       CORS_ALLOWED_ORIGINS: "http://localhost:${FRONTEND_PORT:-4205},http://localhost:4200"
+      MOCK_DATA_ENABLED: "${MOCK_DATA_ENABLED:-false}"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     ports:
@@ -56,6 +60,13 @@ services:
       sqlserver-init:
         condition: service_completed_successfully
     restart: unless-stopped
+
+  backend-tests:
+    profiles: ["test"]
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: test
 
   angular-frontend:
     build:

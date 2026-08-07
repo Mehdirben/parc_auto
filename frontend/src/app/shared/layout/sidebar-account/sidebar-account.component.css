@@ -1,0 +1,20 @@
+:host { display: block; min-width: 0; }
+.account { display: flex; min-width: 0; flex-direction: column; gap: 6px; }
+button { color: inherit; font: inherit; background: none; border: 0; cursor: pointer; }
+.identity, .session-action, .login-action { display: flex; width: 100%; align-items: center; border-radius: 9px; transition: padding .28s cubic-bezier(.4, 0, .2, 1), gap .28s cubic-bezier(.4, 0, .2, 1), color .16s ease, background .16s ease; }
+.identity { min-width: 0; padding: 6px; gap: 10px; text-align: left; }
+.identity:hover, .session-action:hover, .login-action:hover { color: #fff; background: rgba(255,255,255,.07); }
+.avatar { display: grid; width: 36px; height: 36px; flex: 0 0 36px; place-items: center; color: #0c3b35; font-size: .7rem; font-weight: 850; background: #d6b85a; border-radius: 10px; }
+.identity-copy { display: flex; min-width: 0; max-width: 175px; flex: 1; flex-direction: column; overflow: hidden; opacity: 1; transform: translateX(0); transition: max-width .28s cubic-bezier(.4, 0, .2, 1), opacity .14s ease .07s, transform .2s ease .04s; }
+.identity-copy strong { overflow: hidden; color: #fff; font-size: .75rem; text-overflow: ellipsis; white-space: nowrap; }
+.identity-copy small { margin-top: 2px; overflow: hidden; color: #9fb8b2; font-size: .64rem; text-overflow: ellipsis; white-space: nowrap; }
+.session-action, .login-action { min-height: 36px; padding: 8px 10px; gap: 11px; color: #a9c0bb; font-size: .71rem; font-weight: 700; }
+.session-action svg, .login-action svg { flex: 0 0 19px; }.session-action span, .login-action span { overflow: hidden; max-width: 130px; white-space: nowrap; opacity: 1; transform: translateX(0); transition: max-width .28s cubic-bezier(.4, 0, .2, 1), opacity .14s ease .07s, transform .2s ease .04s; }
+.login-action { color: #fff; background: rgba(213,184,90,.15); }
+.collapsed .identity { padding-inline: 10px; gap: 0; }.collapsed .session-action, .collapsed .login-action { padding-inline: 18px; gap: 0; }
+.collapsed .identity-copy, .collapsed .session-action span, .collapsed .login-action span { max-width: 0; opacity: 0; transform: translateX(-8px); transition-delay: 0s; }
+button:focus-visible { outline: 3px solid rgba(214,184,90,.35); outline-offset: 1px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .identity, .session-action, .login-action, .identity-copy, .session-action span, .login-action span { transition: none; }
+}

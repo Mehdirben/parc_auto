@@ -1,0 +1,35 @@
+<section class="tab-panel">
+  <div class="section-toolbar">
+    <div><h3>Relevés kilométriques</h3><small>Initial : {{ vehicule.kilometrageInitial | number:'1.0-0':'fr' }} km</small></div>
+    @if (!lectureSeule) {
+      <button class="btn btn-primary btn-compact" type="button" (click)="ouvrir()">Ajouter un relevé</button>
+    }
+  </div>
+  @if (vehicule.releves.length) {
+    <div class="record-list">
+      @for (releve of vehicule.releves; track releve) {
+        <article>
+          <strong>{{ releve.kilometrage | number:'1.0-0':'fr' }} km</strong>
+          <span>{{ releve.date | date:'dd/MM/yyyy' }} · {{ libelleSource(releve.source) }}</span>
+          @if (releve.commentaire) {
+            <small>{{ releve.commentaire }}</small>
+          }
+        </article>
+      }
+    </div>
+  } @else {
+    <div class="empty-detail">Aucun relevé ajouté depuis la création.</div>
+  }
+</section>
+
+<app-form-modal [open]="modalOuverte" eyebrow="Kilométrage" title="Ajouter un relevé" (closed)="modalOuverte = false">
+  <form [formGroup]="form" (ngSubmit)="enregistrer()">
+    <div class="form-grid">
+      <app-form-field label="Date du relevé" controlId="dateReleve" [required]="true"><input class="form-control" id="dateReleve" type="date" [max]="aujourdHui" [formControl]="form.controls.date"></app-form-field>
+      <app-form-field label="Kilométrage" controlId="kilometrageReleve" [required]="true"><input class="form-control" id="kilometrageReleve" type="number" min="0" [formControl]="form.controls.kilometrage"></app-form-field>
+      <app-form-field label="Source" controlId="sourceReleve" [required]="true"><select class="form-control" id="sourceReleve" [formControl]="form.controls.source"><option value="SAISIE_MANUELLE">Saisie manuelle</option><option value="CONTROLE_PARC">Contrôle parc</option><option value="AUTRE">Autre</option></select></app-form-field>
+      <app-form-field label="Commentaire" controlId="commentaireReleve" help="Obligatoire si le kilométrage est inférieur au kilométrage actuel."><input class="form-control" id="commentaireReleve" maxlength="80" [formControl]="form.controls.commentaire"></app-form-field>
+    </div>
+    <footer><button class="btn btn-secondary" type="button" (click)="modalOuverte = false">Annuler</button><button class="btn btn-primary" type="submit" [disabled]="enregistrement">Ajouter</button></footer>
+  </form>
+</app-form-modal>

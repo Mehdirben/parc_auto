@@ -1,10 +1,14 @@
 <div class="toast-stack" aria-live="polite" aria-atomic="false">
-  <article class="toast" *ngFor="let toast of toastService.messages$ | async" [ngClass]="toast.kind">
-    <span class="toast-mark">{{ toast.kind === 'success' ? '✓' : toast.kind === 'error' ? '!' : 'i' }}</span>
-    <div>
-      <strong>{{ toast.title }}</strong>
-      <p *ngIf="toast.message">{{ toast.message }}</p>
-    </div>
-    <button type="button" aria-label="Fermer la notification" (click)="toastService.dismiss(toast.id)">×</button>
-  </article>
+  @for (toast of toastService.messages$ | async; track toast) {
+    <article class="toast" [ngClass]="toast.kind">
+      <span class="toast-mark">{{ toast.kind === 'success' ? '✓' : toast.kind === 'error' ? '!' : 'i' }}</span>
+      <div>
+        <strong>{{ toast.title }}</strong>
+        @if (toast.message) {
+          <p>{{ toast.message }}</p>
+        }
+      </div>
+      <button type="button" aria-label="Fermer la notification" (click)="toastService.dismiss(toast.id)">×</button>
+    </article>
+  }
 </div>

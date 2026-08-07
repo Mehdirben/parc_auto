@@ -1,13 +1,12 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'app-search-toolbar',
-  standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './search-toolbar.component.html',
-  styleUrls: ['./search-toolbar.component.css']
+    selector: 'app-search-toolbar',
+    imports: [ReactiveFormsModule],
+    templateUrl: './search-toolbar.component.html',
+    styleUrls: ['./search-toolbar.component.css']
 })
 export class SearchToolbarComponent {
   @Input({ required: true }) control!: FormControl<string>;

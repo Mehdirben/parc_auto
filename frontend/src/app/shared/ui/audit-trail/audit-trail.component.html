@@ -3,7 +3,11 @@
   <dl>
     <div><dt>Créée le</dt><dd>{{ createdAt | date:'dd/MM/yyyy à HH:mm' }}</dd></div>
     <div><dt>Créée par</dt><dd>{{ createdBy }}</dd></div>
-    <div *ngIf="updatedAt"><dt>Modifiée le</dt><dd>{{ updatedAt | date:'dd/MM/yyyy à HH:mm' }}</dd></div>
-    <div *ngIf="updatedBy"><dt>Modifiée par</dt><dd>{{ updatedBy }}</dd></div>
+    @if (updatedAt) {
+      <div><dt>Modifiée le</dt><dd>{{ updatedAt | date:'dd/MM/yyyy à HH:mm' }}</dd></div>
+    }
+    @if (updatedBy) {
+      <div><dt>Modifiée par</dt><dd>{{ updatedBy }}</dd></div>
+    }
   </dl>
 </section>

@@ -1,0 +1,265 @@
+<app-page-header
+  eyebrow="Référentiels"
+  title="Conducteurs"
+  description="Gérez les conducteurs du parc et suivez la validité de leurs permis.">
+  @if (permissions.peutModifier) {
+    <button class="btn btn-primary" type="button" (click)="ouvrirCreation()">
+      <svg viewBox="0 0 24 24" width="17" height="17"><path fill="currentColor" d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5Z"/></svg>
+      Ajouter un conducteur
+    </button>
+  }
+</app-page-header>
+
+<section class="summary-grid">
+  <app-summary-card [value]="statistiques.total" label="Conducteurs" [icon]="peopleIcon"></app-summary-card>
+  <app-summary-card [value]="statistiques.actifs" label="Actifs" [icon]="activeIcon"></app-summary-card>
+  <app-summary-card [value]="statistiques.permisExpirantBientot" label="Permis à renouveler sous 30 jours" [icon]="permitIcon" tone="gold"></app-summary-card>
+  <app-summary-card [value]="statistiques.permisExpires" label="Permis expirés" [icon]="permitIcon" tone="gold"></app-summary-card>
+</section>
+
+<section class="panel list-panel" [attr.aria-busy]="chargement">
+  <app-search-toolbar
+    [control]="recherche"
+    placeholder="Rechercher par nom, matricule, permis ou téléphone…"
+    ariaLabel="Rechercher un conducteur"
+    (refreshed)="charger()">
+    <select class="filter-select" [formControl]="statutFiltre" aria-label="Filtrer par statut">
+      <option value="">Tous les statuts</option>
+      <option value="actif">Actif</option>
+      <option value="inactif">Inactif</option>
+    </select>
+    <select class="filter-select" [formControl]="permisFiltre"
+      aria-label="Filtrer par validité du permis">
+      <option value="">Tous les permis</option>
+      <option value="EXPIRE">Permis expirés</option>
+      <option value="A_RENOUVELER">À renouveler sous 30 jours</option>
+    </select>
+  </app-search-toolbar>
+
+  @if (page.contenu.length) {
+    <app-data-table>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Matricule</th><th>Conducteur</th><th>Téléphone</th><th>Permis</th>
+            <th>Validité</th><th>Statut</th><th class="actions-column">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (conducteur of page.contenu; track identifier($index, conducteur)) {
+            <tr>
+              <td><span class="code-chip">{{ conducteur.matricule }}</span></td>
+              <td>
+                <button class="entity-link" type="button" (click)="consulter(conducteur)">
+                  {{ conducteur.nomComplet }}
+                </button>
+              </td>
+              <td>{{ conducteur.telephone || '—' }}</td>
+              <td>{{ conducteur.numeroPermis }}</td>
+              <td>
+                <span class="permit-date" [class.expired]="permisExpire(conducteur.dateValiditePermis)">
+                  {{ conducteur.dateValiditePermis | date:'dd/MM/yyyy' }}
+                </span>
+              </td>
+              <td>
+                <span class="status-badge" [class.success]="conducteur.actif" [class.neutral]="!conducteur.actif">
+                  {{ conducteur.actif ? 'Actif' : 'Inactif' }}
+                </span>
+              </td>
+              <td class="actions-cell">
+                <app-table-action kind="view" (triggered)="consulter(conducteur)"></app-table-action>
+                @if (permissions.peutModifier) {
+                  <app-table-action kind="edit" (triggered)="ouvrirModification(conducteur)"></app-table-action>
+                }
+                @if (permissions.peutModifier) {
+                  <app-table-action
+                    kind="status"
+                    [label]="conducteur.actif ? 'Désactiver' : 'Activer'"
+                    (triggered)="demanderChangementStatut(conducteur)">
+                  </app-table-action>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </app-data-table>
+  }
+
+  @if (chargement && !page.contenu.length) {
+    <app-table-loading></app-table-loading>
+  }
+  @if (!chargement && !page.contenu.length && !erreur) {
+    <app-empty-state
+      title="Aucun conducteur trouvé"
+      [description]="recherche.value || statutFiltre.value || permisFiltre.value ? 'Aucun résultat ne correspond aux filtres sélectionnés.' : 'Commencez par créer le premier conducteur.'">
+      @if (permissions.peutModifier && !recherche.value && !statutFiltre.value && !permisFiltre.value) {
+        <button
+          class="btn btn-primary"
+          type="button"
+        (click)="ouvrirCreation()">Ajouter un conducteur</button>
+      }
+    </app-empty-state>
+  }
+  @if (!chargement && erreur) {
+    <app-empty-state
+      title="Chargement impossible"
+      [description]="erreur">
+      <button class="btn btn-secondary" type="button" (click)="charger()">Réessayer</button>
+    </app-empty-state>
+  }
+  @if (page.contenu.length) {
+    <app-pagination
+      [page]="page.page"
+      [pageSize]="page.taille"
+      [totalItems]="page.totalElements"
+      [totalPages]="page.totalPages"
+      [first]="page.premiere"
+      [last]="page.derniere"
+      [disabled]="chargement"
+      (pageChange)="charger($event)">
+    </app-pagination>
+  }
+</section>
+
+<app-detail-modal
+  [open]="chargementDetail || !!selection"
+  [loading]="chargementDetail"
+  loadingText="Chargement du conducteur…"
+  eyebrow="Fiche conducteur"
+  [title]="selection?.nomComplet || ''"
+  [code]="selection?.matricule || ''"
+  ariaLabel="Détail du conducteur"
+  (closed)="selection = null">
+  @if (selection; as conducteur) {
+    <dl class="identity-grid">
+      <div><dt>Téléphone</dt><dd>{{ conducteur.telephone || 'Non renseigné' }}</dd></div>
+      <div><dt>N° de permis</dt><dd>{{ conducteur.numeroPermis }}</dd></div>
+      <div>
+        <dt>Validité du permis</dt>
+        <dd [class.danger-text]="permisExpire(conducteur.dateValiditePermis)">
+          {{ conducteur.dateValiditePermis | date:'dd/MM/yyyy' }}
+        </dd>
+      </div>
+      <div>
+        <dt>Statut</dt>
+        <dd>
+          <span class="status-badge" [class.success]="conducteur.actif" [class.neutral]="!conducteur.actif">
+            {{ conducteur.actif ? 'Actif' : 'Inactif' }}
+          </span>
+        </dd>
+      </div>
+    </dl>
+    <section class="detail-section">
+      <div class="section-title"><div><span>Véhicules actuellement affectés</span><strong>{{ conducteur.vehiculesActuels.length }}</strong></div></div>
+      @if (conducteur.vehiculesActuels.length) {
+        <div class="assignment-list">
+          @for (affectation of conducteur.vehiculesActuels; track affectation) {
+            <article>
+              <div><strong>{{ affectation.immatriculation }}</strong><span>{{ affectation.marqueModele }}</span></div>
+              <div class="assignment-meta"><span>{{ affectation.service }}</span><small>Depuis le {{ affectation.dateDebut | date:'dd/MM/yyyy' }}</small></div>
+            </article>
+          }
+        </div>
+      } @else {
+        <div class="empty-detail">Aucun véhicule actuellement affecté.</div>
+      }
+    </section>
+    <section class="detail-section">
+      <div class="section-title"><div><span>Historique des affectations</span><strong>{{ conducteur.historiqueAffectations.length }}</strong></div></div>
+      @if (conducteur.historiqueAffectations.length) {
+        <div class="assignment-list">
+          @for (affectation of conducteur.historiqueAffectations; track affectation) {
+            <article>
+              <div><strong>{{ affectation.immatriculation }}</strong><span>{{ affectation.marqueModele }}</span></div>
+              <div class="assignment-meta">
+                <span>{{ affectation.service }}</span>
+                <small>Du {{ affectation.dateDebut | date:'dd/MM/yyyy' }} au {{ affectation.dateFin | date:'dd/MM/yyyy' }}</small>
+              </div>
+            </article>
+          }
+        </div>
+      } @else {
+        <div class="empty-detail">Aucune affectation terminée.</div>
+      }
+    </section>
+    <app-audit-trail
+      [createdAt]="conducteur.dateCreation"
+      [createdBy]="conducteur.creePar"
+      [updatedAt]="conducteur.dateModification"
+      [updatedBy]="conducteur.modifiePar || ''">
+    </app-audit-trail>
+    <app-activity-timeline [items]="historique"></app-activity-timeline>
+  }
+</app-detail-modal>
+
+<app-form-modal
+  [open]="dialogueOuvert"
+  [eyebrow]="dialogueMode === 'create' ? 'Nouvelle entrée' : 'Modification'"
+  [title]="dialogueMode === 'create' ? 'Ajouter un conducteur' : 'Modifier le conducteur'"
+  (closed)="dialogueOuvert = false">
+  <form [formGroup]="formulaire" (ngSubmit)="enregistrer()">
+    <div class="form-grid">
+      <app-form-field
+        label="Matricule"
+        controlId="matriculeConducteur"
+        [required]="true"
+        help="Identifiant métier unique du conducteur, 20 caractères maximum."
+        [error]="formulaire.controls.matricule.touched && formulaire.controls.matricule.invalid ? 'Le matricule est obligatoire et limité à 20 caractères.' : ''">
+        <input class="form-control" id="matriculeConducteur" [formControl]="formulaire.controls.matricule" maxlength="20" placeholder="Ex. 1234567">
+      </app-form-field>
+      <app-form-field
+        label="Nom complet"
+        controlId="nomConducteur"
+        [required]="true"
+        [error]="formulaire.controls.nomComplet.touched && formulaire.controls.nomComplet.invalid ? 'Le nom complet est obligatoire (80 caractères maximum).' : ''">
+        <input class="form-control" id="nomConducteur" [formControl]="formulaire.controls.nomComplet" maxlength="80" placeholder="Prénom et nom">
+      </app-form-field>
+      <app-form-field
+        label="Téléphone"
+        controlId="telephoneConducteur"
+        help="Format marocain : 0612345678 ou +212612345678."
+        [error]="formulaire.controls.telephone.touched && formulaire.controls.telephone.invalid ? 'Saisissez un numéro marocain valide.' : ''">
+        <input class="form-control" id="telephoneConducteur" type="tel" [formControl]="formulaire.controls.telephone" maxlength="13" placeholder="0612345678">
+      </app-form-field>
+      <app-form-field
+        label="N° de permis"
+        controlId="permisConducteur"
+        [required]="true"
+        help="Numéro de permis unique, 50 caractères maximum."
+        [error]="formulaire.controls.numeroPermis.touched && formulaire.controls.numeroPermis.invalid ? 'Le numéro de permis est obligatoire et limité à 50 caractères.' : ''">
+        <input class="form-control" id="permisConducteur" [formControl]="formulaire.controls.numeroPermis" maxlength="50" placeholder="Ex. 123456789012">
+      </app-form-field>
+      <app-form-field
+        class="full-field"
+        label="Date de validité du permis"
+        controlId="validitePermis"
+        [required]="true"
+        [error]="formulaire.controls.dateValiditePermis.touched && formulaire.controls.dateValiditePermis.invalid ? 'La date doit être aujourd’hui ou ultérieure.' : ''">
+        <input class="form-control" id="validitePermis" type="date" [min]="aujourdHui" [formControl]="formulaire.controls.dateValiditePermis">
+      </app-form-field>
+    </div>
+    @if (dialogueMode === 'create') {
+      <p class="default-status"><span></span>Le nouveau conducteur sera créé avec le statut Actif.</p>
+    }
+    <footer>
+      <button class="btn btn-secondary" type="button" (click)="dialogueOuvert = false">Annuler</button>
+      <button class="btn btn-primary" type="submit" [disabled]="enregistrement">
+        @if (enregistrement) {
+          <span class="button-spinner"></span>
+        }
+        {{ dialogueMode === 'create' ? 'Créer le conducteur' : 'Enregistrer' }}
+      </button>
+    </footer>
+  </form>
+</app-form-modal>
+
+<app-confirm-dialog
+  [open]="!!cibleStatut"
+  [destructive]="!!cibleStatut?.actif"
+  [title]="cibleStatut?.actif ? 'Désactiver le conducteur' : 'Activer le conducteur'"
+  [message]="cibleStatut?.actif ? 'Le conducteur restera consultable dans les historiques mais ne sera plus proposé pour les nouvelles affectations ou opérations carburant.' : 'Le conducteur sera de nouveau disponible pour les nouvelles affectations et opérations carburant.'"
+  [confirmLabel]="cibleStatut?.actif ? 'Désactiver' : 'Activer'"
+  (cancelled)="cibleStatut = null"
+  (confirmed)="confirmerChangementStatut()">
+</app-confirm-dialog>

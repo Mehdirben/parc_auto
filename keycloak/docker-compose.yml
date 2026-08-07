@@ -36,6 +36,10 @@ services:
       KC_DB_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in keycloak/.env}
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:?Set KEYCLOAK_ADMIN in keycloak/.env}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?Set KEYCLOAK_ADMIN_PASSWORD in keycloak/.env}
+      # Keep one canonical issuer for browser and backend calls. The backend
+      # reaches this container through host.docker.internal, while tokens are
+      # issued to the browser on localhost.
+      KC_HOSTNAME_URL: http://localhost:${KEYCLOAK_PORT:?Set KEYCLOAK_PORT in keycloak/.env}
     ports:
       - "${KEYCLOAK_PORT:?Set KEYCLOAK_PORT in keycloak/.env}:8080"
     volumes:

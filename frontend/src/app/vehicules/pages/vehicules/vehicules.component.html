@@ -1,0 +1,218 @@
+<app-page-header
+  eyebrow="Parc automobile"
+  title="Véhicules"
+  description="Consultez le parc, ses documents, ses relevés kilométriques et son historique.">
+  @if (permissions.peutModifier) {
+    <button class="btn btn-primary" type="button" (click)="creationOuverte = true">
+      <svg viewBox="0 0 24 24" width="17" height="17"><path fill="currentColor" d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5Z"/></svg>
+      Ajouter un véhicule
+    </button>
+  }
+</app-page-header>
+
+<section class="summary-grid vehicle-summary">
+  <app-summary-card [value]="statistiques.total" label="Véhicules" [icon]="vehiculeIcon"></app-summary-card>
+  <app-summary-card [value]="statistiques.disponibles" label="Disponibles" [icon]="okIcon"></app-summary-card>
+  <app-summary-card [value]="statistiques.affectes" label="Affectés" [icon]="vehiculeIcon" tone="gold"></app-summary-card>
+  <app-summary-card [value]="statistiques.immobilises + statistiques.enMaintenance" label="Indisponibles" [icon]="pauseIcon" tone="gold"></app-summary-card>
+</section>
+
+<section class="panel list-panel" [attr.aria-busy]="chargement">
+  <app-search-toolbar
+    [control]="recherche"
+    placeholder="Rechercher par code, immatriculation, VIN, marque ou modèle…"
+    ariaLabel="Rechercher un véhicule"
+    (refreshed)="charger()">
+    <select class="filter-select" [formControl]="statutFiltre" aria-label="Filtrer par statut">
+      <option value="">Tous les statuts</option>
+      <option value="DISPONIBLE">Disponible</option><option value="AFFECTE">Affecté</option>
+      <option value="IMMOBILISE">Immobilisé</option><option value="EN_MAINTENANCE">En maintenance</option>
+      <option value="REFORME">Réformé</option><option value="INACTIF">Inactif</option>
+    </select>
+    <select class="filter-select" [formControl]="marqueFiltre" aria-label="Filtrer par marque">
+      <option value="">Toutes les marques</option>
+      @for (marque of marques; track marque) {
+        <option [value]="marque.code">{{ marque.designation }}</option>
+      }
+    </select>
+    <select class="filter-select" [formControl]="genreFiltre" aria-label="Filtrer par genre">
+      <option value="">Tous les genres</option>
+      <option value="VOITURE_TOURISME">Voiture de tourisme</option><option value="FOURGONNETTE_VITREE">Fourgonnette vitrée</option>
+      <option value="FOURGONNETTE">Fourgonnette</option><option value="MINIBUS">Minibus</option>
+      <option value="UTILITAIRE">Utilitaire</option><option value="CYCLOMOTEUR">Cyclomoteur</option>
+    </select>
+    <select class="filter-select" [formControl]="carburantFiltre" aria-label="Filtrer par carburant">
+      <option value="">Tous les carburants</option>
+      <option value="DIESEL">Diesel</option><option value="ESSENCE">Essence</option>
+      <option value="HYBRIDE">Hybride</option><option value="ELECTRIQUE">Électrique</option><option value="MELANGE">Mélange</option>
+    </select>
+  </app-search-toolbar>
+
+  @if (page.contenu.length) {
+    <app-data-table>
+      <table class="data-table">
+        <thead><tr><th>Code</th><th>Immatriculation</th><th>Marque / Modèle</th><th>Genre</th><th>Kilométrage</th><th>Statut</th><th>État</th><th class="actions-column">Actions</th></tr></thead>
+        <tbody>
+          @for (vehicule of page.contenu; track identifier($index, vehicule)) {
+            <tr>
+              <td><span class="code-chip">{{ vehicule.code }}</span></td>
+              <td><button class="entity-link" type="button" (click)="consulter(vehicule)">{{ vehicule.immatriculation }}</button></td>
+              <td><div class="model-cell"><strong>{{ vehicule.marque }}</strong><small>{{ vehicule.modele }}</small></div></td>
+              <td>{{ libelleGenre(vehicule.genre) }}</td>
+              <td>{{ vehicule.kilometrageActuel | number:'1.0-0':'fr' }} km</td>
+              <td><span class="status-badge" [class.success]="vehicule.statut === 'DISPONIBLE'" [class.warning]="vehicule.statut === 'AFFECTE' || vehicule.statut === 'EN_MAINTENANCE'" [class.danger]="vehicule.statut === 'IMMOBILISE'" [class.neutral]="vehicule.statut === 'REFORME' || vehicule.statut === 'INACTIF'">{{ libelleStatut(vehicule.statut) }}</span></td>
+              <td>{{ libelleEtat(vehicule.etatGeneral) }}</td>
+              <td class="actions-cell"><app-table-action kind="view" (triggered)="consulter(vehicule)"></app-table-action></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </app-data-table>
+  }
+  @if (chargement && !page.contenu.length) {
+    <app-table-loading></app-table-loading>
+  }
+  @if (!chargement && !page.contenu.length && !erreur) {
+    <app-empty-state
+      title="Aucun véhicule trouvé"
+      [description]="recherche.value || statutFiltre.value || marqueFiltre.value || genreFiltre.value || carburantFiltre.value ? 'Aucun résultat ne correspond aux filtres sélectionnés.' : 'Commencez par créer le premier véhicule.'">
+      @if (permissions.peutModifier && !recherche.value && !statutFiltre.value && !marqueFiltre.value && !genreFiltre.value && !carburantFiltre.value) {
+        <button class="btn btn-primary" type="button" (click)="creationOuverte = true">Ajouter un véhicule</button>
+      }
+    </app-empty-state>
+  }
+  @if (!chargement && erreur) {
+    <app-empty-state title="Chargement impossible" [description]="erreur"><button class="btn btn-secondary" type="button" (click)="charger()">Réessayer</button></app-empty-state>
+  }
+  @if (page.contenu.length) {
+    <app-pagination [page]="page.page" [pageSize]="page.taille" [totalItems]="page.totalElements" [totalPages]="page.totalPages" [first]="page.premiere" [last]="page.derniere" [disabled]="chargement" (pageChange)="charger($event)"></app-pagination>
+  }
+</section>
+
+<app-detail-modal
+  [open]="chargementDetail || !!selection" [loading]="chargementDetail"
+  loadingText="Chargement du véhicule…" eyebrow="Fiche véhicule"
+  [title]="selection?.immatriculation || ''" [code]="selection?.code || ''"
+  ariaLabel="Fiche du véhicule" (closed)="selection = null">
+  @if (selection; as vehicule) {
+    <div class="detail-actions">
+      <div>
+        <span class="status-badge" [class.success]="vehicule.statut === 'DISPONIBLE'" [class.warning]="vehicule.statut === 'AFFECTE' || vehicule.statut === 'EN_MAINTENANCE'" [class.danger]="vehicule.statut === 'IMMOBILISE'" [class.neutral]="vehicule.statut === 'REFORME' || vehicule.statut === 'INACTIF'">{{ libelleStatut(vehicule.statut) }}</span>
+        <span class="mileage">{{ vehicule.kilometrageActuel | number:'1.0-0':'fr' }} km</span>
+      </div>
+      @if (permissions.peutModifier) {
+        <button class="btn btn-secondary btn-compact" type="button" (click)="situationOuverte = true">Modifier la situation</button>
+      }
+    </div>
+    <nav class="tabs" aria-label="Sections de la fiche">
+      <button type="button" [class.active]="onglet === 'identification'" (click)="onglet = 'identification'">Identification</button>
+      <button type="button" [class.active]="onglet === 'affectation'" (click)="onglet = 'affectation'">Affectation</button>
+      <button type="button" [class.active]="onglet === 'documents'" (click)="onglet = 'documents'">Documents <span>{{ vehicule.piecesJointes.length }}</span></button>
+      <button type="button" [class.active]="onglet === 'kilometrage'" (click)="onglet = 'kilometrage'">Kilométrage</button>
+      <button type="button" [class.active]="onglet === 'historique'" (click)="onglet = 'historique'">Historique</button>
+    </nav>
+    @if (onglet === 'identification') {
+      <section class="tab-panel">
+        <dl class="identity-grid vehicle-identity">
+          <div><dt>Immatriculation</dt><dd>{{ vehicule.immatriculation }}</dd></div>
+          <div><dt>Ancienne immatriculation</dt><dd>{{ vehicule.ancienneImmatriculation || '—' }}</dd></div>
+          <div><dt>Marque</dt><dd>{{ vehicule.marque }}</dd></div>
+          <div><dt>Modèle</dt><dd>{{ vehicule.modele }}</dd></div>
+          <div><dt>VIN</dt><dd>{{ vehicule.vin }}</dd></div>
+          <div><dt>Genre</dt><dd>{{ libelleGenre(vehicule.genre) }}</dd></div>
+          <div><dt>Carburant</dt><dd>{{ libelleCarburant(vehicule.carburant) }}</dd></div>
+          <div><dt>Puissance fiscale</dt><dd>{{ vehicule.puissanceFiscale }} CV</dd></div>
+          <div><dt>Cylindres</dt><dd>{{ vehicule.nombreCylindres || '—' }}</dd></div>
+          <div><dt>Poids à vide</dt><dd>{{ vehicule.poidsVide ? (vehicule.poidsVide + ' kg') : '—' }}</dd></div>
+          <div><dt>Poids total en charge</dt><dd>{{ vehicule.poidsTotalCharge ? (vehicule.poidsTotalCharge + ' kg') : '—' }}</dd></div>
+          <div><dt>État général</dt><dd>{{ libelleEtat(vehicule.etatGeneral) }}</dd></div>
+          <div><dt>1ère mise en circulation</dt><dd>{{ vehicule.datePremiereMiseCirculation ? (vehicule.datePremiereMiseCirculation | date:'dd/MM/yyyy') : '—' }}</dd></div>
+          <div><dt>Date de mutation</dt><dd>{{ vehicule.dateMutation ? (vehicule.dateMutation | date:'dd/MM/yyyy') : '—' }}</dd></div>
+        </dl>
+        <app-information-notice
+          title="Informations verrouillées"
+          message="Ces données ne peuvent plus être modifiées après la création du véhicule.">
+        </app-information-notice>
+      </section>
+    }
+    @if (onglet === 'affectation') {
+      <section class="tab-panel">
+        <div class="assignment-navigation">
+          <p>Les mouvements sont gérés depuis le module Affectations afin de préserver l’historique.</p>
+          <a class="btn btn-secondary btn-compact" routerLink="/affectations">Aller aux affectations</a>
+        </div>
+        @if (vehicule.affectationActuelle; as affectation) {
+          <div class="current-assignment">
+            <div><span>Service / parc</span><strong>{{ affectation.service }}</strong></div>
+            <div><span>Conducteur</span><strong>{{ affectation.conducteur }}</strong></div>
+            <div><span>Depuis le</span><strong>{{ affectation.dateDebut | date:'dd/MM/yyyy' }}</strong></div>
+            @if (permissions.peutModifier && affectation.ordreMissionDisponible) {
+              <button class="btn btn-primary btn-compact"
+              type="button" (click)="ouvrirOrdreMission(affectation)">Ordre de mission</button>
+            }
+          </div>
+        } @else {
+          <div class="empty-detail">Aucune affectation active.</div>
+        }
+        <h3 class="subheading">Historique des affectations</h3>
+        @if (vehicule.historiqueAffectations.length) {
+          <div class="record-list">
+            @for (affectation of vehicule.historiqueAffectations; track affectation) {
+              <article>
+                <div class="assignment-history-heading">
+                  <strong>{{ affectation.service }}</strong>
+                  @if (permissions.peutModifier && affectation.ordreMissionDisponible) {
+                    <button
+                      class="btn btn-secondary btn-compact" type="button"
+                    (click)="ouvrirOrdreMission(affectation)">Ordre de mission</button>
+                  }
+                </div>
+                <span>{{ affectation.conducteur }}</span>
+                <small>{{ affectation.dateDebut | date:'dd/MM/yyyy' }} — {{ affectation.dateFin | date:'dd/MM/yyyy' }} · {{ affectation.motif }}</small>
+              </article>
+            }
+          </div>
+        } @else {
+          <div class="empty-detail">Aucune affectation terminée.</div>
+        }
+      </section>
+    }
+    @if (onglet === 'documents') {
+      <app-vehicule-documents
+        [vehicule]="vehicule"
+        [lectureSeule]="!permissions.peutModifier"
+        (updated)="apresMiseAJour($event)">
+      </app-vehicule-documents>
+    }
+    @if (onglet === 'kilometrage') {
+      <app-vehicule-kilometrage
+        [vehicule]="vehicule"
+        [lectureSeule]="!permissions.peutModifier"
+        (updated)="apresMiseAJour($event)">
+      </app-vehicule-kilometrage>
+    }
+    @if (onglet === 'historique') {
+      <section class="tab-panel">
+        <app-audit-trail [createdAt]="vehicule.dateCreation" [createdBy]="vehicule.creePar" [updatedAt]="vehicule.dateModification" [updatedBy]="vehicule.modifiePar || ''"></app-audit-trail>
+        <app-activity-timeline [items]="historique"></app-activity-timeline>
+      </section>
+    }
+  }
+</app-detail-modal>
+
+<app-vehicule-creation-modal
+  [open]="creationOuverte"
+  [marques]="marques"
+  (closed)="creationOuverte = false"
+  (created)="apresCreation()">
+</app-vehicule-creation-modal>
+
+<app-vehicule-situation-modal
+  [open]="situationOuverte"
+  [vehicule]="selection"
+  (closed)="situationOuverte = false"
+  (updated)="apresMiseAJourSituation($event)">
+</app-vehicule-situation-modal>
+
+<app-ordre-mission-modal [ordre]="ordreMission"
+(closed)="ordreMission = null"></app-ordre-mission-modal>

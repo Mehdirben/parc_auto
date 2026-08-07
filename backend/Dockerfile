@@ -1,11 +1,14 @@
 FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /workspace
 COPY pom.xml .
-RUN mvn -B -q dependency:go-offline
+RUN mvn -B -q dependency:resolve
 COPY src src
 RUN mvn -B -q package -DskipTests
 
-FROM eclipse-temurin:21-jre
+FROM build AS test
+RUN mvn -B test
+
+FROM eclipse-temurin:21-jre AS runtime
 WORKDIR /app
 RUN useradd --system --uid 10001 spring
 COPY --from=build /workspace/target/parc-automobile-api-0.1.0-SNAPSHOT.jar app.jar

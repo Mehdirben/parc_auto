@@ -1,0 +1,33 @@
+<section class="dynamic-text-list">
+  <div class="dynamic-text-heading">
+    <strong>{{ title }}</strong>
+    <small>Un {{ singularLabel.toLocaleLowerCase() }} par champ</small>
+  </div>
+
+  @for (controle of control.controls; track identifier(index, controle); let index = $index) {
+    <div
+      class="dynamic-text-row"
+      >
+      <label [for]="idPrefix + index">{{ singularLabel }} {{ index + 1 }}</label>
+      <div>
+        <input
+          class="form-control"
+          [id]="idPrefix + index"
+          [formControl]="controle"
+          [attr.maxlength]="maxLength"
+          [placeholder]="index === 0 ? firstPlaceholder : nextPlaceholder">
+        @if (control.length > 1 && index < control.length - 1) {
+          <button
+            type="button"
+            [attr.aria-label]="'Supprimer ' + singularLabel.toLocaleLowerCase()"
+          (click)="supprimer(index)">×</button>
+        }
+      </div>
+      @if (controle.touched && controle.invalid) {
+        <small class="dynamic-text-error">
+          {{ controle.hasError('maxlength') ? maxLength + ' caractères maximum.' : requiredMessage }}
+        </small>
+      }
+    </div>
+  }
+</section>
